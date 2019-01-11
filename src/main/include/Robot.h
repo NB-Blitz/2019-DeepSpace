@@ -26,7 +26,8 @@
  * be much more difficult under this system. Use TimedRobot or Command-Based
  * instead if you're new.
  */
-class Robot : public frc::SampleRobot {
+class Robot : public frc::SampleRobot 
+{
  public:
   Robot();
 
@@ -36,14 +37,5 @@ class Robot : public frc::SampleRobot {
   void Test() override;
 
  private:
-  // Robot drive system
-  frc::PWMVictorSPX m_leftMotor{0};
-  frc::PWMVictorSPX m_rightMotor{1};
-  frc::DifferentialDrive m_robotDrive{m_leftMotor, m_rightMotor};
 
-  frc::Joystick m_stick{0};
-
-  frc::SendableChooser<std::string> m_chooser;
-  const std::string kAutoNameDefault = "Default";
-  const std::string kAutoNameCustom = "My Auto";
 };
