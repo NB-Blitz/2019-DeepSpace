@@ -15,10 +15,19 @@ void Blitz::Joysticks::ThreeAxisJoystick::update()
     Button10 = ThreeAxis.GetRawButton(BUTTON10_ID);
     Button11 = ThreeAxis.GetRawButton(BUTTON11_ID);
     Button12 = ThreeAxis.GetRawButton(BUTTON12_ID);
+    
+    //Update DPad
+    DPad[0] = ThreeAxis.GetRawButton(D_PAD_ID[0]);
+    DPad[1] = ThreeAxis.GetRawButton(D_PAD_ID[1]);
+    DPad[2] = ThreeAxis.GetRawButton(D_PAD_ID[2]);
+    DPad[3] = ThreeAxis.GetRawButton(D_PAD_ID[3]);
+    DPad[4] = ThreeAxis.GetRawButton(D_PAD_ID[4]);
+    DPad[5] = ThreeAxis.GetRawButton(D_PAD_ID[5]);
+    DPad[6] = ThreeAxis.GetRawButton(D_PAD_ID[6]);
+    DPad[7] = ThreeAxis.GetRawButton(D_PAD_ID[7]);
 
     //Update Axis
     XAxis = ThreeAxis.GetRawAxis(X_AXIS_ID);
     YAxis = ThreeAxis.GetRawAxis(Y_AXIS_ID);
-    ZAxis = ThreeAxis.GetRawAxis(Z_AXIS_ID);
     Dial = ThreeAxis.GetRawAxis(DIAL_ID);
 }
