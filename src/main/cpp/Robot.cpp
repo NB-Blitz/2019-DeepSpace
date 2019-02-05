@@ -27,8 +27,108 @@ void Robot::RobotInit()
 
 void Robot::Autonomous() 
 {
-  
+  double Speed = 0.3;
+
+  double stageOne = 1.5;
+  double stageTwo = 5.25;
+  double stageThree = 5.5;
+  double stageFour = 5.6;
+  double stageFive = 10.5;
+  double stageSix = 12.25;
+  double stageSeven = 17.25;
+
+  frc::Timer seconds; 
+  seconds.Start();
+  while(IsAutonomous() && IsEnabled())
+  {
+
+    if(seconds.Get() <= stageOne)
+    {
+      //Go forwards
+      MecanumInput.XValue = 0;
+      MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+      MecanumInput.ZValue = 0;
+       frc::SmartDashboard::PutString("Turning", "false");
+       frc::SmartDashboard::PutString("Moving", "true");
+    }
+
+    else if (seconds.Get() <= stageTwo)
+    {
+      //Diagonal right
+      MecanumInput.XValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+      MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+      MecanumInput.ZValue = 0;
+       frc::SmartDashboard::PutString("Turning", "true");
+       frc::SmartDashboard::PutString("Moving", "true");
+    }
+
+    else if (seconds.Get() <= stageThree)
+    {
+      //Go forwards
+      MecanumInput.XValue = 0;
+      MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+      MecanumInput.ZValue = 0;
+       frc::SmartDashboard::PutString("Turning", "false");
+       frc::SmartDashboard::PutString("Moving", "true");
+    }
+   
+    else if(seconds.Get() <= stageFour)
+    {
+      //Place the hatch panel/cover on the hatch during this time.
+      seconds.Stop();
+      MecanumInput.XValue = 0;
+      MecanumInput.YValue = 0;
+      MecanumInput.ZValue = 0;
+      seconds.Start();
+       frc::SmartDashboard::PutString("Moving", "false");
+    }
+
+    else if (seconds.Get() <= stageFive)
+    {
+      //Go straight left.
+      MecanumInput.XValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+      MecanumInput.YValue = 0;
+      MecanumInput.ZValue = 0;
+       frc::SmartDashboard::PutString("Turning", "true");
+       frc::SmartDashboard::PutString("Moving", "true");
+    }
+
+    else if (seconds.Get() <= stageSix)
+    {
+      //Turn 180 degrees.
+      MecanumInput.XValue = 0;
+      MecanumInput.YValue = 0;
+      MecanumInput.ZValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+       frc::SmartDashboard::PutString("Turning", "180");
+       frc::SmartDashboard::PutString("Moving", "false");
+    }
+    
+    else if (seconds.Get() <= stageSeven)
+    {
+      //Move forward.
+      MecanumInput.XValue = 0;
+      MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+      MecanumInput.ZValue = 0;
+       frc::SmartDashboard::PutString("Turning", "true");
+       frc::SmartDashboard::PutString("Moving", "true");
+    }
+    
+    else 
+    {
+      //Grab the hatch from the wall during this stopped time. 
+      seconds.Stop();
+      MecanumInput.XValue = 0;
+      MecanumInput.YValue = 0;
+      MecanumInput.ZValue = 0;
+       frc::SmartDashboard::PutString("Moving", "false");
+    }
+    MecanumDrive.Run();
+
+    frc::Wait(0.015);
+
+  }
 }
+
 
 void Robot::OperatorControl() 
 {
