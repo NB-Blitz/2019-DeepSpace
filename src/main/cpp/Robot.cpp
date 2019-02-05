@@ -1,53 +1,107 @@
-#include "Manipulator.hpp"
+/*
+  IMPORTANT NOTE: Some features using PID and all features using the second motor are commented out
+*/
+#include "Robot.h"
 #include "Blitz_Joystick.hpp"
+#include "Manipulator.hpp"
+#include <iostream>
 
-class Robot: public frc::SampleRobot
+#include <frc/smartdashboard/SmartDashboard.h>
+
+
+frc::Manipulator Manip;
+frc::Blitz_Joystick Blitz_Joy;
+double rotateDegrees;
+bool isMain = true;
+
+void Robot::RobotInit() 
 {
- 	frc::Manipulator Manip;
-	frc::Blitz_Joystick Blitz_Joy;
+  Manip.initializePID(true); //PID is initialized
+}
 
-public:
-	Robot():
-		Manip(),
-		Blitz_Joy()
-	{
+void Robot::RobotPeriodic() 
+{
+  double yAxis = Blitz_Joy.getAxis(1); 
+  rotateDegrees = Manip.getDegrees(0); //Purely for SmartDashboard
+  //Manip.updatePIDCoefficients();
+  if (Blitz_Joy.getButton(1)) //Resets Encoder value to 0 
+  {
+    if (isMain)
+    {
+      Manip.resetDegrees(0);
+    }
+    else
+    {
+      //Manip.resetDegrees(1);
+    }
+  }
+  else if (Blitz_Joy.getButton(2)) //Sets Manipulator to 45 degrees using PID
+  {
+    if (isMain)
+    {
+      Manip.manipSetPID(45, 0);
+    }
+    else
+    {
+      //Manip.manipSetPID(45, 1);
+    }
+  }
+  else if (Blitz_Joy.getButton(3)) //Sets Manipulator to 90 degrees using PID
+  {
+    if (isMain)
+    {
+      Manip.manipSetPID(90, 0);
+    }
+    else
+    {
+      //Manip.manipSetPID(90, 1);
+    }
+    
+  }
+  else if (Blitz_Joy.getButton(4)) //Moves Manipulator until it hits its limit switch, then resets its encoder
+  {
+    if (isMain)
+    {
+      Manip.resetToEncoder(0);
+    }
+    else
+    {
+      //Manip.resetToEncoder(1);
+    }
+  }
+  else //Manual control of Manipulator with joystick
+  {
+    if (isMain)
+    {
+      Manip.manipSet(yAxis, 0);
+    }
+    else
+    { 
+      //Manip.manipSet(yAxis, 1);
+    }
+  }
 
-	}
+  frc::SmartDashboard::PutNumber("Y-Axis", yAxis);
+  frc::SmartDashboard::PutBoolean("IsResetButton", Blitz_Joy.getButton(1));
+  frc::SmartDashboard::PutBoolean("IsLimitSwitch-Main", Manip.isLimit(0));
+  frc::SmartDashboard::PutNumber("Rotate Degrees", rotateDegrees);
+  //frc::SmartDashboard::PutBoolean("IsLimitSwitch-Secondary", Manip.isLimit(1));
+  frc::SmartDashboard::PutNumber("P-Main", Manip.getP(0));
+  frc::SmartDashboard::PutNumber("I-Main", Manip.getI(0));
+  frc::SmartDashboard::PutNumber("D-Main", Manip.getD(0));
+  frc::SmartDashboard::PutNumber("F-Main", Manip.getF(0));
+  //frc::SmartDashboard::PutNumber("P-Secondary", Manip.getP(1));
+  //frc::SmartDashboard::PutNumber("I-Secondary", Manip.getI(1));
+  //frc::SmartDashboard::PutNumber("D-Secondary", Manip.getD(1));
+  //frc::SmartDashboard::PutNumber("F-Secondary", Manip.getF(1));
+}
 
-	void OperatorControl()
-	{
-		double degreePosition = 0; //Position of Main_Axis as controlled by Joystick
-		const double MAXIMUM_RANGE = 100; //Maximum Range of degreePosition, which controls Main_Axis
-  		while (IsOperatorControl() && IsEnabled()) 
-  		{
-			if (Blitz_Joy.getButton(1)) //This button overrides normal behavior
-			{
-				Manip.reset(); //Resets Manipulator to original position
-				degreePosition = 0; //Resets desired Manipulator Position
-			}
-			else //Normal Behavior
-			{
-				//Joystick degreePosition is modified
-				if (Blitz_Joy.getJoystick() == 1 && degreePosition < MAXIMUM_RANGE)
-				{
-					degreePosition += 0.15; //Translates to approximately 30 degrees per second
-				}
-				else if (Blitz_Joy.getJoystick() == -1 && degreePosition > 0)
-				{
-					degreePosition -= 0.15; //Translates to approximately -30 degrees per second
-				}
-				Manip.moveTo(degreePosition); //Manipulator moves to accommidate (Takes into account DEAD_ZONE = 5 degrees)
-			}
+void Robot::AutonomousInit() {}
+void Robot::AutonomousPeriodic() {}
+void Robot::TeleopInit() {}
+void Robot::TeleopPeriodic() {}
+void Robot::TestPeriodic() {}
 
-			//Displays desirable information to Smart Dashboard
-			frc::SmartDashboard::PutNumber("Manipulator - Desired Degrees", degreePosition);
-			frc::SmartDashboard::PutNumber("Manipulator - Actual Degrees", Manip.getDegrees());
-			frc::SmartDashboard::PutBoolean("Is in Reset State?", Blitz_Joy.getButton(1));
-
-    		frc::Wait(0.005);
-  		}
-	}
-};
 #ifndef RUNNING_FRC_TESTS
 int main() { return frc::StartRobot<Robot>(); }
 #endif
