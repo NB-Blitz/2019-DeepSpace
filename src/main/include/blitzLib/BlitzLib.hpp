@@ -7,3 +7,4 @@
 #include "include/Octocanum.hpp"
 #include "include/Tank.hpp"
 #include "include/BlitzLogger.hpp"
+#include "include/Ultrasonic.hpp"

@@ -9,7 +9,8 @@ Robot::Robot() :
   Logger(0),
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
-  Xbox(0)
+  Xbox(0),
+  Ultrasonic(0)
 {
 
 }
@@ -35,6 +36,8 @@ void Robot::OperatorControl()
   while (IsOperatorControl() && IsEnabled()) 
   {
     Xbox.update();
+	//Robot.setWorking(true);
+	//bool workNormally = true;
 
     double XInput = -Xbox.RightX;
     double YInput = Xbox.RightY;
