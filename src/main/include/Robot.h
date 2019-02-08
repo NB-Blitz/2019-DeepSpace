@@ -3,6 +3,7 @@
 #include <frc/WPILib.h>
 #include <BlitzLib/BlitzLib.hpp>
 #include <ctre/Phoenix.h>
+#include <Math.h>
 
 
 class Robot : public frc::SampleRobot 

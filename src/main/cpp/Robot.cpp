@@ -34,8 +34,8 @@ void Robot::Autonomous()
     double BallDist = SmartDashboard::GetNumber("Distance", 0.0);
 
     double XInput = 0;
-    double YInput = -(BallDist - 15) / 120;
-    double ZInput = XCenterDist / 350;
+    double YInput = -(BallDist - 35) / 120;
+    double ZInput = pow(XCenterDist / 176, 3)/2.5;
 
     if(fabs(XInput) < .1)
     {
