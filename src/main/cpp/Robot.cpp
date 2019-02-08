@@ -9,7 +9,9 @@ Robot::Robot() :
   Logger(0),
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
-  Xbox(0)
+  Xbox(0),
+  Arms(),
+  Comp(0)
 {
 
 }
@@ -27,43 +29,26 @@ void Robot::RobotInit()
 
 void Robot::Autonomous() 
 {
-  while(IsAutonomous() && IsEnabled())
-  {
-    double XCenterDist = SmartDashboard::GetNumber("XOffset", 0.0);
-    double YCenterDist = SmartDashboard::GetNumber("YOffset", 0.0);
-    double BallDist = SmartDashboard::GetNumber("Distance", 0.0);
 
-    double XInput = 0;
-    double YInput = -(BallDist - 15) / 120;
-    double ZInput = XCenterDist / 350;
-
-    if(fabs(XInput) < .1)
-    {
-      XInput = 0;
-    }
-
-    if(fabs(YInput) < .1)
-    {
-      YInput = 0;
-    }
-
-    if(fabs(ZInput) < .1)
-    {
-      ZInput = 0;
-    }
-
-    MecanumInput.XValue = (XInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
-    MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
-    MecanumInput.ZValue = (ZInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
-
-    MecanumDrive.Run();
-  }
 }
 
 void Robot::OperatorControl() 
 {
+  
+  Comp.SetClosedLoopControl(true);
+
   while (IsOperatorControl() && IsEnabled()) 
   {
+
+    if(Xbox.AButton)
+    {
+      Arms.CloseArms();
+    }
+    else if(Xbox.BButton)
+    {
+      Arms.OpenArms();
+    }
+
     Xbox.update();
 
     double XInput = -Xbox.RightX;

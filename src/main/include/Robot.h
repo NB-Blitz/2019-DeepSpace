@@ -4,6 +4,8 @@
 #include <BlitzLib/BlitzLib.hpp>
 #include <ctre/Phoenix.h>
 
+#include "Manipulator.hpp"
+
 
 class Robot : public frc::SampleRobot 
 {
@@ -23,4 +25,6 @@ class Robot : public frc::SampleRobot
         Blitz::Models::MecanumInput MecanumInput;
         Blitz::Mecanum MecanumDrive;
         Blitz::Joysticks::XboxController Xbox;
+        Blitz::Manipulator Arms;
+        Compressor Comp;
 };
