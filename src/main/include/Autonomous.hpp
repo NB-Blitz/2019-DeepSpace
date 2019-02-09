@@ -10,7 +10,7 @@ namespace Blitz
         public:
             Autonomous();
 
-            void DriveToBall(Blitz::Models::MecanumInput *Input);
+            bool DriveToBall(Blitz::Models::MecanumInput *Input);
 
         private:
 
