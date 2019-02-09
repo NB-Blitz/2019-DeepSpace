@@ -7,28 +7,26 @@
 
 #pragma once
 
-//C++ Library Include
 #include <string>
 
-//WPILIB Include
-#include <WPILib.h>
+#include <frc/IterativeRobot.h>
+#include <frc/smartdashboard/SendableChooser.h>
+#include <frc/WPILib.h>
 
-//Blitz Lib Include
-#include "blitzlib/BlitzLib.hpp"
+#include "ctre/Phoenix.h"
 
-/**
-
- */
-class Robot : public frc::SampleRobot 
-{
+class Robot : public frc::IterativeRobot {
  public:
-  Robot();
-
   void RobotInit() override;
-  void Autonomous() override;
-  void OperatorControl() override;
-  void Test() override;
+  void RobotPeriodic() override;
+  void AutonomousInit() override;
+  void AutonomousPeriodic() override;
+  void TeleopInit() override;
+  void TeleopPeriodic() override;
+  void TestPeriodic() override;
 
  private:
-
+  frc::Joystick joy{0};
+  TalonSRX motor{6};
+  frc::DigitalInput limit{0};
 };
