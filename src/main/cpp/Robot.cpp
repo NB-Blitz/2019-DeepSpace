@@ -9,7 +9,8 @@ Robot::Robot() :
   Logger(0),
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
-  Xbox(0)
+  Xbox(0),
+  Navx(SPI::Port::kMXP)
 {
 
 }
@@ -29,16 +30,23 @@ void Robot::Autonomous()
 {
   double Speed = 0.3;
 
+  bool direction = true; //True starts on the left, false on the right
+
   double stageOne = 1.5;
   double stageTwo = 5.25;
   double stageThree = 5.5;
   double stageFour = 5.6;
   double stageFive = 10.5;
-  double stageSix = 12.25;
-  double stageSeven = 17.25;
+  double stageSix = 10.6;
+  double stageSeven = 15.5;
+
+  double turnAngle = 180;
 
   frc::Timer seconds; 
   seconds.Start();
+
+  Navx.ZeroYaw();
+
   while(IsAutonomous() && IsEnabled())
   {
 
@@ -48,18 +56,25 @@ void Robot::Autonomous()
       MecanumInput.XValue = 0;
       MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
       MecanumInput.ZValue = 0;
-       frc::SmartDashboard::PutString("Turning", "false");
-       frc::SmartDashboard::PutString("Moving", "true");
     }
 
     else if (seconds.Get() <= stageTwo)
     {
-      //Diagonal right
-      MecanumInput.XValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
-      MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
-      MecanumInput.ZValue = 0;
-       frc::SmartDashboard::PutString("Turning", "true");
-       frc::SmartDashboard::PutString("Moving", "true");
+      if (direction == true)
+      {
+        //Diagonal right
+        MecanumInput.XValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.ZValue = 0;
+      }
+      
+      else
+      {
+        //Diagonal left
+        MecanumInput.XValue = -Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.ZValue = 0;
+      }
     }
 
     else if (seconds.Get() <= stageThree)
@@ -68,49 +83,63 @@ void Robot::Autonomous()
       MecanumInput.XValue = 0;
       MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
       MecanumInput.ZValue = 0;
-       frc::SmartDashboard::PutString("Turning", "false");
-       frc::SmartDashboard::PutString("Moving", "true");
     }
    
     else if(seconds.Get() <= stageFour)
     {
-      //Place the hatch panel/cover on the hatch during this time.
+      //Place the hatch panel/cover on the hatch during this time
       seconds.Stop();
       MecanumInput.XValue = 0;
       MecanumInput.YValue = 0;
       MecanumInput.ZValue = 0;
       seconds.Start();
-       frc::SmartDashboard::PutString("Moving", "false");
     }
 
     else if (seconds.Get() <= stageFive)
     {
-      //Go straight left.
-      MecanumInput.XValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
-      MecanumInput.YValue = 0;
-      MecanumInput.ZValue = 0;
-       frc::SmartDashboard::PutString("Turning", "true");
-       frc::SmartDashboard::PutString("Moving", "true");
+      if (direction == true)
+      {
+        //Go straight left
+        MecanumInput.XValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.YValue = 0;
+        MecanumInput.ZValue = 0;
+      }
+
+      else
+      {
+        //Go straight right
+        MecanumInput.XValue = -Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.YValue = 0;
+        MecanumInput.ZValue = 0;
+      }
     }
 
     else if (seconds.Get() <= stageSix)
     {
-      //Turn 180 degrees.
-      MecanumInput.XValue = 0;
-      MecanumInput.YValue = 0;
-      MecanumInput.ZValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
-       frc::SmartDashboard::PutString("Turning", "180");
-       frc::SmartDashboard::PutString("Moving", "false");
+      //Turn 180 degrees
+      seconds.Stop();
+      frc::SmartDashboard::PutNumber("Angle", Navx.GetYaw());
+      if (Navx.GetYaw() >= 0 && Navx.GetYaw() < turnAngle)
+      {
+        MecanumInput.XValue = 0;
+        MecanumInput.YValue = 0;
+        MecanumInput.ZValue = (-(turnAngle - Navx.GetYaw()) * Speed * (1/turnAngle) + -Speed / 2) * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+      }
+      else
+      {
+        MecanumInput.XValue = 0;
+        MecanumInput.YValue = 0;
+        MecanumInput.ZValue = 0;
+      }
+      seconds.Start();
     }
     
     else if (seconds.Get() <= stageSeven)
     {
-      //Move forward.
+      //Move forward
       MecanumInput.XValue = 0;
       MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
       MecanumInput.ZValue = 0;
-       frc::SmartDashboard::PutString("Turning", "true");
-       frc::SmartDashboard::PutString("Moving", "true");
     }
     
     else 
@@ -120,7 +149,6 @@ void Robot::Autonomous()
       MecanumInput.XValue = 0;
       MecanumInput.YValue = 0;
       MecanumInput.ZValue = 0;
-       frc::SmartDashboard::PutString("Moving", "false");
     }
     MecanumDrive.Run();
 
