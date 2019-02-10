@@ -1,5 +1,6 @@
 /*
-  IMPORTANT NOTE: Some features using PID and all features using the second motor are commented out
+  IMPORTANT NOTE:
+  - manipSetPID is malfunctioning, it runs but the test prints don't change?
 */
 #include "Robot.h"
 #include "Blitz_Joystick.hpp"
@@ -26,93 +27,70 @@ void Robot::RobotPeriodic()
 void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
 void Robot::TeleopInit() {
-  rotateDegreesMain = 90;
-  rotateDegreesSecondary = 30;//, rotateDegreesWrist;
   Manip.initializePID(true); //PID is initialized
   Manip.resetDegrees(0);
 }
+//Highly recommended to reset to encoder both axes before starting
 void Robot::TeleopPeriodic() {
-  std::cout << "Beginning of RobotPeriodic: " << rotateDegreesMain << std::endl;
-  double yAxis = Blitz_Joy.getAxis(1); 
-  isMain = !Blitz_Joy.getButton(6);
-  if (Blitz_Joy.getButton(1)) //Resets Encoder value to 0 
+  double yAxisMain = Blitz_Joy.getAxis(1,0); 
+  double yAxisSecondary = Blitz_Joy.getAxis(1,1);
+  
+  if (Blitz_Joy.getButton(3, 0))
   {
-    if (isMain)
-    {
-      Manip.resetDegrees(0);
-    }
-    else
-    {
-      Manip.resetDegrees(1);
-    }
+    Manip.moveToCoordinates(-8.66,5); 
   }
-  else if (Blitz_Joy.getButton(2)) //Sets Manipulator to 45 degrees using PID
+  else
   {
-    if (isMain)
-    {
-      Manip.manipSetPID(135, 0);
-    }
-    else
-    {
-      Manip.manipSetPID(135, 1);
-    }
-  }
-  else if (Blitz_Joy.getButton(3)) //Sets Manipulator to 90 degrees using PID
-  {
-    if (isMain)
-    {
-      Manip.manipSetPID(180, 0);
-    }
-    else
-    {
-      Manip.manipSetPID(180, 1);
-    }
-    
-  }
-  else if (Blitz_Joy.getButton(4)) //Moves Manipulator until it hits its limit switch, then resets its encoder
-  {
-    if (isMain)
+    //Main Axis
+    if (Blitz_Joy.getButton(1,0)) //Reset To Encoder
     {
       Manip.resetToEncoder(0);
     }
+    else if (Blitz_Joy.getButton(2,0))
+    {
+      Manip.manipSetToDegrees(180, 0);
+    }
     else
     {
-      Manip.resetToEncoder(1);
-    }
-  }
-  else if (Blitz_Joy.getButton(5))
-  {
-    Manip.moveToCoordinates(5,5);
-    //Manip.moveToParallel(5,5);
-  }
-  else //Manual control of Manipulator with joystick
-  {
-    if (isMain)
-    {
-      
-      //Manip.manipSetPID(rotateDegreesSecondary, 1); // * Holds axes not in use in its previous position
-      if (yAxis > 0.1 || yAxis < -0.1)
+      if (yAxisMain > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisMain < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
       {
-        Manip.manipSet(yAxis, 0); 
-        rotateDegreesMain = Manip.getDegrees(0);
-        std::cout << "ON" << std::endl;
+        Manip.manipSet(yAxisMain,0);
       }
       else
       {
-        Manip.manipSetPID(rotateDegreesMain, 0); //*
-        std::cout << "OFF" << std::endl;
+        Manip.manipSet(0,0);
       }
-      
+    }
+
+    //Secondary Axis
+    if (Blitz_Joy.getButton(1,1))
+    {
+      Manip.resetToEncoder(1);
+    }
+    else if (Blitz_Joy.getButton(2,1))
+    {
+      Manip.manipSetToDegrees(180, 1);
     }
     else
-    { 
-      rotateDegreesSecondary = Manip.getDegrees(1); 
-      //Manip.manipSetPID(rotateDegreesMain, 0);  //Holds axes not in use in its previous position
-      Manip.manipSet(yAxis, 1);
+    {
+      if (yAxisSecondary > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisSecondary < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+      {
+        Manip.manipSet(yAxisSecondary,1);
+      }
+      else
+      {
+        Manip.manipSet(0,1);
+      }
     }
-    
   }
+  
+  frc::SmartDashboard::PutNumber("Degrees Main", Manip.getDegrees(0));
+  frc::SmartDashboard::PutNumber("Raw Encoder Main", Manip.Main_Axis.GetSelectedSensorPosition(0));
+  frc::SmartDashboard::PutNumber("Degrees Secondary", Manip.getDegrees(1));
+  frc::SmartDashboard::PutNumber("Raw Encoder Secondary", Manip.Secondary_Axis.GetSelectedSensorPosition(0));
 
+
+/*
   frc::SmartDashboard::PutNumber("TestEnc", Manip.Main_Axis.GetSelectedSensorPosition(0));
   frc::SmartDashboard::PutNumber("Y-Axis", yAxis);
   frc::SmartDashboard::PutBoolean("IsResetButton", Blitz_Joy.getButton(1));
@@ -137,6 +115,7 @@ void Robot::TeleopPeriodic() {
   //frc::SmartDashboard::PutNumber("F-Wrist", Manip.getF(2));
   frc::SmartDashboard::PutBoolean("isMain", isMain);
   std::cout << "End of RobotPeriodic: " << rotateDegreesMain << std::endl;
+  */
   frc::Wait(0.005);
 }
 void Robot::TestPeriodic() {

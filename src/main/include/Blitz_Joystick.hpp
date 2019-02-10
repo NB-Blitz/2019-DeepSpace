@@ -9,13 +9,14 @@ namespace frc
     class Blitz_Joystick
     {
         private:
-            Joystick joystick;
-            const double JOYSTICK_DEAD_ZONE = 0.1;
+            Joystick Joystick_Main, Joystick_Secondary;
+            
 
         public:
             Blitz_Joystick();
-            bool getButton(int id);
-            double getAxis(int id);
+            bool getButton(int id, int axisID);
+            double getAxis(int id, int axisID);
+            double const JOYSTICK_DEAD_ZONE = 0.1;
     };
 }
 

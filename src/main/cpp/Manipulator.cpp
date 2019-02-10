@@ -4,9 +4,9 @@
 
 //Pete's Roborio is Team Number 5150
 frc::Manipulator::Manipulator() :
-    Main_Axis(3), 
+    Main_Axis(2), 
     Main_Axis_Limit_Switch(0),
-    Secondary_Axis(2),
+    Secondary_Axis(3),
     Secondary_Axis_Limit_Switch(1)//Placeholder ID
     //Wrist_Axis(10), //Placeholder ID
     //Wrist_Axis_Limit_Switch(2)//Placeholder ID
@@ -66,6 +66,52 @@ void frc::Manipulator::manipSet(double speed, int axisID) //Moves Manipulator in
 
    
 }
+
+void frc::Manipulator::manipSetToDegrees(double degrees, int axisID)
+{
+    double currentDegrees = getDegrees(axisID);
+    if ((axisID == 0) && !(isLimit(0) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_MAIN)) //Prevents movement to unsafe areas
+    {
+        double speed = ((3 / pow(MAX_RANGE_MAIN - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN, 2)) * pow((degrees - currentDegrees), 2)) + 0.2;
+        if ((degrees - currentDegrees) > 0.5)
+        {
+            manipSet(speed, 0);
+        }
+        else if ((degrees - currentDegrees) < -0.5)
+        {
+            manipSet(-speed, 0);
+        }
+        else
+        {
+            manipSet(0, 0);
+        }
+    }
+    else if ((axisID == 1) && !(isLimit(1) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_SECONDARY))
+    {
+        double speed = ((3 / pow(MAX_RANGE_SECONDARY - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY, 2)) * pow((degrees - currentDegrees), 2)) + 0.2;
+        if ((degrees - currentDegrees) > 0.5)
+        {
+            manipSet(speed, 1);
+        }
+        else if ((degrees - currentDegrees) < -0.5)
+        {
+            manipSet(-speed, 1);
+        }
+        else
+        {
+            manipSet(0, 1);
+        }
+    }
+    else
+    {
+        manipSet(0, axisID);
+    }
+    
+}
+
+
+
+/*
 //It works, at least for 45 degrees tested (further tuning may be needed)
 void frc::Manipulator::manipSetPID(double degrees, int axisID) //Moves Manipulator to a set degree with PID
 {
@@ -110,9 +156,8 @@ void frc::Manipulator::manipSetPID(double degrees, int axisID) //Moves Manipulat
         frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
         frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
     }
-    */
 }
-
+*/
 bool frc::Manipulator::isLimit(int axisID) //Returns if a limit switch is activated - Opposite logic due to wiring
 {
     if (axisID == 0)
@@ -139,10 +184,10 @@ double frc::Manipulator::getDegrees(int axisID) //Returns degrees from an encode
         double degrees =  Main_Axis.GetSelectedSensorPosition(0) / TO_DEGREES_MAIN;
         return abs(fmod(degrees + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN, 360));   
     }
-    else if (axisID == 1)
+    else if (axisID == 1) //Needs changing
     {
         double degrees =  Secondary_Axis.GetSelectedSensorPosition(0) / TO_DEGREES_SECONDARY;
-        return abs(fmod(degrees + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY, 360));   
+        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY - degrees, 360));   
     }
     /*
     else if (axisID == 2)
@@ -328,28 +373,32 @@ double frc::Manipulator::getAngleForCoordinates(double x, double y, int axisID) 
 {
     double pi = 3.14159265358979323846;
     double radiansToDegrees = (180 / pi);
-    double c = sqrt(pow(LENGTH_MAIN, 2) + pow(LENGTH_SECONDARY, 2));
+    double c = sqrt(pow(x, 2) + pow(y, 2));
     if (axisID == 0)
     {
         double d1 = acos((pow(LENGTH_MAIN,2) + pow(c,2) - pow(LENGTH_SECONDARY,2)) / (2 * LENGTH_MAIN * c));
         double d2 = atan2(y,x);
-        return ((d1 + d2) * radiansToDegrees);
+        return ((d1 + d2) * radiansToDegrees) + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN;
         
     }
     else if (axisID == 1)
     {
-        return (acos((pow(LENGTH_MAIN,2) + pow(LENGTH_SECONDARY,2) - pow(c,2)) / (2 * LENGTH_MAIN * LENGTH_SECONDARY)) * radiansToDegrees) - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY; //180 - might be wrong
+        return (acos((pow(LENGTH_MAIN,2) + pow(LENGTH_SECONDARY,2) - pow(c,2)) / (2 * LENGTH_MAIN * LENGTH_SECONDARY)) * radiansToDegrees); //180 - might be wrong
     }
     else
-    {
+    {   
         return 0;
     }
+    /*
+        all functions are in radians -> I return degrees
+
+    */
 }
 
 void frc::Manipulator::moveToCoordinates(double x, double y) //Moves both axes to the angles necessary to reach the given coordinates
 {
-    manipSetPID(getAngleForCoordinates(x,y,0), 0);
-    manipSetPID(getAngleForCoordinates(x,y,1), 1);
+    manipSetToDegrees(getAngleForCoordinates(x,y,0), 0);
+    manipSetToDegrees(getAngleForCoordinates(x,y,1), 1);
 }
 /*
 double frc::Manipulator::getAngleForParallel(double x, double y)

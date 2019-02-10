@@ -19,11 +19,11 @@ namespace frc
             const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN = 90; //True Zero = faces parallel to ground and faces forward
 
             //For Secondary Axis
-            const double TO_DEGREES_SECONDARY = 22;
-            const double MAX_RANGE_SECONDARY = 330;
-            const double LENGTH_SECONDARY = 4.5; //In inches
+            const double TO_DEGREES_SECONDARY = 24;
+            const double MAX_RANGE_SECONDARY = 300;
+            const double LENGTH_SECONDARY = 4; //In inches
             const double ENCODER_COUNTS_PER_ROTATION_SECONDARY = 3649;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY = 30; //True Zero = faces previous axis
+            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY = 87; //True Zero = faces previous axis
 
             /*
             //For Wrist Axis
@@ -65,7 +65,8 @@ namespace frc
             DigitalInput Main_Axis_Limit_Switch, Secondary_Axis_Limit_Switch;//, Wrist_Axis_Limit_Switch; 
             Manipulator();
             void manipSet(double speed, int axisID); //PercentageOutput (No PID)
-            void manipSetPID(double degrees, int axisID); //Position (With PID)
+            //void manipSetPID(double degrees, int axisID); //Position (With PID)
+            void manipSetToDegrees(double degrees, int axisID);
             bool isLimit(int axisID);
             double getDegrees(int axisID); //0 is Main, 1 is Secondary...
             void resetDegrees(int axisID); //See above
