@@ -1,6 +1,15 @@
 /*
-  IMPORTANT NOTE:
-  - manipSetPID is malfunctioning, it runs but the test prints don't change?
+  2/11/19
+  Code is currently functional, but possibly not optimized
+  
+  Steps to transfer code to a new arm/manipulator:
+  1) Update all relevant constants in Manipulator.hpp
+  2) See how angle information is gathered (potentiometers, encoders, etc.)
+  3) Make sure that degrees increase how they're supposed to (should not decreasing if they should increase, etc.) and modify getDegrees() as necessary
+  4) Check ports
+  5) See how limit information is gathered and modify isLimit() as necessary
+  6) Test stuff
+  7) Add wrist/manipulator code (Main and Secondary Axis are already in the code)
 */
 #include "Robot.h"
 #include "Blitz_Joystick.hpp"
@@ -14,6 +23,8 @@ frc::Manipulator Manip;
 frc::Blitz_Joystick Blitz_Joy;
 double rotateDegreesMain, rotateDegreesSecondary;//, rotateDegreesWrist;
 bool isMain = true;
+double xPos = 9.25;
+double yPos = 0;
 
 void Robot::RobotInit() 
 {
@@ -28,16 +39,25 @@ void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
 void Robot::TeleopInit() {
   Manip.initializePID(true); //PID is initialized
-  Manip.resetDegrees(0);
 }
 //Highly recommended to reset to encoder both axes before starting
 void Robot::TeleopPeriodic() {
   double yAxisMain = Blitz_Joy.getAxis(1,0); 
   double yAxisSecondary = Blitz_Joy.getAxis(1,1);
-  
+  xPos = (Blitz_Joy.getAxis(3, 1) * 3) + 12.5;
+  yPos = (Blitz_Joy.getAxis(3, 0) * 10) + 10;
+
   if (Blitz_Joy.getButton(3, 0))
   {
-    Manip.moveToCoordinates(-8.66,5); 
+    if (Manip.isPossible(xPos, yPos))
+    {
+      Manip.moveToCoordinates(xPos, yPos);
+    }
+    else
+    {
+      Manip.manipSet(0,0);
+      Manip.manipSet(0,1);
+    }
   }
   else
   {
@@ -88,7 +108,8 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("Raw Encoder Main", Manip.Main_Axis.GetSelectedSensorPosition(0));
   frc::SmartDashboard::PutNumber("Degrees Secondary", Manip.getDegrees(1));
   frc::SmartDashboard::PutNumber("Raw Encoder Secondary", Manip.Secondary_Axis.GetSelectedSensorPosition(0));
-
+  frc::SmartDashboard::PutNumber("X-Pos", xPos);
+  frc::SmartDashboard::PutNumber("Y-Pos", yPos);
 
 /*
   frc::SmartDashboard::PutNumber("TestEnc", Manip.Main_Axis.GetSelectedSensorPosition(0));

@@ -4,10 +4,10 @@
 
 //Pete's Roborio is Team Number 5150
 frc::Manipulator::Manipulator() :
-    Main_Axis(2), 
-    Main_Axis_Limit_Switch(0),
-    Secondary_Axis(3),
-    Secondary_Axis_Limit_Switch(1)//Placeholder ID
+    Main_Axis(3), 
+    Main_Axis_Limit_Switch(1),
+    Secondary_Axis(2),
+    Secondary_Axis_Limit_Switch(0)//Placeholder ID
     //Wrist_Axis(10), //Placeholder ID
     //Wrist_Axis_Limit_Switch(2)//Placeholder ID
 {
@@ -182,12 +182,12 @@ double frc::Manipulator::getDegrees(int axisID) //Returns degrees from an encode
     if (axisID == 0)
     {
         double degrees =  Main_Axis.GetSelectedSensorPosition(0) / TO_DEGREES_MAIN;
-        return abs(fmod(degrees + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN, 360));   
+        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN - degrees, 360));   
     }
     else if (axisID == 1) //Needs changing
     {
         double degrees =  Secondary_Axis.GetSelectedSensorPosition(0) / TO_DEGREES_SECONDARY;
-        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY - degrees, 360));   
+        return abs(fmod(degrees + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY, 360));   
     }
     /*
     else if (axisID == 2)
@@ -225,7 +225,7 @@ void frc::Manipulator::resetToEncoder(int axisID)
 {
     if (!isLimit(axisID))
     {
-        manipSet(-0.2 , axisID);
+        manipSet(-0.35 , axisID);
     }
     else
     {
@@ -399,6 +399,16 @@ void frc::Manipulator::moveToCoordinates(double x, double y) //Moves both axes t
 {
     manipSetToDegrees(getAngleForCoordinates(x,y,0), 0);
     manipSetToDegrees(getAngleForCoordinates(x,y,1), 1);
+}
+bool frc::Manipulator::isPossible(double x, double y)
+{
+    double angle1 = getAngleForCoordinates(x,y,0);
+    double angle2 = getAngleForCoordinates(x,y,1);
+    if (((angle1 < MAX_RANGE_MAIN) && (angle1 > DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN)) && ((angle1 < MAX_RANGE_MAIN) && (angle1 > DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN)))
+    {
+        return true;
+    }
+    return false;
 }
 /*
 double frc::Manipulator::getAngleForParallel(double x, double y)
