@@ -24,4 +24,5 @@ class Robot : public frc::SampleRobot
         Blitz::Mecanum MecanumDrive;
         Blitz::Joysticks::XboxController Xbox;
         Blitz::LineTrack LineTracker;
+        Blitz::Ultrasonic Ultrasonics;
 };

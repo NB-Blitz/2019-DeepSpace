@@ -4,10 +4,14 @@ using namespace std;
 
 double Blitz::Ultrasonic::getDistance()
 {   
-    return ((ultrasonic.GetVoltage() / (double)(5.0 / 512.0)) / 12.0);
+    if ((ultrasonicA.GetVoltage() / MULTIPLIER) / 12.0 < (ultrasonicB.GetVoltage() / MULTIPLIER) / 12.0)
+        return ((ultrasonicA.GetVoltage() / MULTIPLIER) / 12.0);
+    else
+        return ((ultrasonicB.GetVoltage() / MULTIPLIER) / 12.0);
 }
 
 bool Blitz::Ultrasonic::willCrash()
 {
-    return getDistance() <= MIN_DISTANCE;
+    SmartDashboard::PutNumber("Distance", getDistance());
+    return getDistance() <= (MIN_DISTANCE / 12.0);
 }

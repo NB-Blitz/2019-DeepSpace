@@ -10,7 +10,8 @@ Robot::Robot() :
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
-  LineTracker()
+  LineTracker(),
+  Ultrasonics(0, 1)
 {
 
 }
@@ -49,6 +50,10 @@ void Robot::OperatorControl()
       XInput = LineTracker.GetDirections()[0];
       YInput = LineTracker.GetDirections()[1];
       ZInput = LineTracker.GetDirections()[2];
+    }
+    if (Ultrasonics.willCrash() && YInput < 0)
+    {
+      YInput = 0;
     }
 
     if(fabs(XInput) < .1)
