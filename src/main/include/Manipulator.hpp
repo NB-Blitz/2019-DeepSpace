@@ -16,7 +16,7 @@ namespace frc
             const double LENGTH_MAIN = 9.5; //in inches
             const double ENCODER_COUNTS_PER_ROTATION_MAIN = 7800;
             const double TO_DEGREES_MAIN = ENCODER_COUNTS_PER_ROTATION_MAIN / 360;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN = 85; //True Zero = faces parallel to ground and faces forward
+            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN = 80; //True Zero = faces parallel to ground and faces forward
 
             //For Secondary Axis
             const double MAX_RANGE_SECONDARY = 270;

@@ -1,15 +1,15 @@
 /*
   2/11/19
   Code is currently functional, but possibly not optimized
-  
-  Steps to transfer code to a new arm/manipulator:
-  1) Update all relevant constants in Manipulator.hpp
-  2) See how angle information is gathered (potentiometers, encoders, etc.)
-  3) Make sure that degrees increase how they're supposed to (should not decreasing if they should increase, etc.) and modify getDegrees() as necessary
-  4) Check ports
-  5) See how limit information is gathered and modify isLimit() as necessary
-  6) Test stuff
-  7) Add wrist/manipulator code (Main and Secondary Axis are already in the code)
+  Speed is currently hardcoded to .25 to protect prototype, but the commented function is better given a better prototype
+  Three test cases (low, medium, high) are maintain x-axis pretty well (within .2 inches)
+
+  TODO
+  - Rename axes (enum)
+  - Remane motors
+  - Go away from limit switches and start from a known
+  - Add isPossible to rest of code (add hard limit for distance of 30 inches)
+  - (If time, work on paths)
 */
 #include "Robot.h"
 #include "Blitz_Joystick.hpp"
@@ -44,20 +44,18 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
   double yAxisMain = Blitz_Joy.getAxis(1,0); 
   double yAxisSecondary = Blitz_Joy.getAxis(1,1);
-  xPos = (Blitz_Joy.getAxis(3, 1) * 3) + 12.5;
-  yPos = (Blitz_Joy.getAxis(3, 0) * 10) + 10;
 
   if (Blitz_Joy.getButton(3, 0))
   {
-    if (Manip.isPossible(xPos, yPos))
-    {
-      Manip.moveToCoordinates(xPos, yPos);
-    }
-    else
-    {
-      Manip.manipSet(0,0);
-      Manip.manipSet(0,1);
-    }
+    Manip.moveToCoordinates(10, -3.5); //Low
+  }
+  else if (Blitz_Joy.getButton(4,0))
+  {
+    Manip.moveToCoordinates(10, 3); //Mid
+  }
+  else if (Blitz_Joy.getButton(5,0))
+  {
+    Manip.moveToCoordinates(10, 8); //High
   }
   else
   {

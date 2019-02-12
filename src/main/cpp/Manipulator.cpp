@@ -72,12 +72,12 @@ void frc::Manipulator::manipSetToDegrees(double degrees, int axisID)
     double currentDegrees = getDegrees(axisID);
     if ((axisID == 0) && !(isLimit(0) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_MAIN)) //Prevents movement to unsafe areas
     {
-        double speed = ((3 / pow(MAX_RANGE_MAIN - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN, 2)) * pow((degrees - currentDegrees), 2)) + 0.2;
-        if ((degrees - currentDegrees) > 0.5)
+        double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03) + 1)) * .3) + .1;
+        if ((degrees - currentDegrees) > 1.5)
         {
             manipSet(speed, 0);
         }
-        else if ((degrees - currentDegrees) < -0.5)
+        else if ((degrees - currentDegrees) < -1.5)
         {
             manipSet(-speed, 0);
         }
@@ -88,7 +88,7 @@ void frc::Manipulator::manipSetToDegrees(double degrees, int axisID)
     }
     else if ((axisID == 1) && !(isLimit(1) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_SECONDARY))
     {
-        double speed = ((3 / pow(MAX_RANGE_SECONDARY - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY, 2)) * pow((degrees - currentDegrees), 2)) + 0.2;
+        double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1)) * .3) + .1;
         if ((degrees - currentDegrees) > 0.5)
         {
             manipSet(speed, 1);
