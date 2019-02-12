@@ -1,10 +1,10 @@
 #include "Robot.h"
 
 Robot::Robot() :
-  LeftFrontMotor(1),
-  LeftBackMotor(2),
-  RightFrontMotor(3),
-  RightBackMotor(4),
+  LeftFrontMotor(0),
+  LeftBackMotor(1),
+  RightFrontMotor(2),
+  RightBackMotor(3),
   Motors(&LeftFrontMotor, &LeftBackMotor, &RightFrontMotor, &RightBackMotor),
   Logger(0),
   MecanumInput(),
@@ -18,6 +18,11 @@ Robot::Robot() :
 void Robot::RobotInit() 
 {
   MecanumDrive.Initialize(&MecanumInput);
+  MecanumDrive.SetMotorDirection(0, -1);
+  MecanumDrive.SetMotorDirection(1, -1);
+  MecanumDrive.SetMotorDirection(2, -1);
+  MecanumDrive.SetMotorDirection(3, -1);
+
 
   frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
   frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
