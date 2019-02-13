@@ -4,169 +4,214 @@
 
 //Pete's Roborio is Team Number 5150
 frc::Manipulator::Manipulator() :
-    Main_Axis(3), 
-    Main_Axis_Limit_Switch(1),
-    Secondary_Axis(2),
-    Secondary_Axis_Limit_Switch(0)//Placeholder ID
+    Shoulder_Motor(3), 
+    Shoulder_Motor_Limit_Switch(0),
+    Elbow_Motor(2),
+    Elbow_Motor_Limit_Switch(1)//Placeholder ID
     //Wrist_Axis(10), //Placeholder ID
     //Wrist_Axis_Limit_Switch(2)//Placeholder ID
 {
 
 }
 //Main has opposite direction to secondary (in degrees)
-void frc::Manipulator::manipSet(double speed, int axisID) //Moves Manipulator in accordance to the joystick without PID
+void frc::Manipulator::manipSet(double speed, int axisID, bool areLimits, double rawHome) //Moves Manipulator in accordance to the joystick without PID
 {
-    if (axisID == 0)
+    if (areLimits)
     {
-        bool cancel1 = ((getDegrees(0) >= MAX_RANGE_MAIN) && speed > 0);
-        bool cancel2 = (isLimit(0) && speed < 0);
-        if (!(cancel1 || cancel2))
+        std::cout << "Limits exist!" << std::endl;
+        if (axisID == 0)
         {
-            Main_Axis.Set(ControlMode::PercentOutput, speed); 
+            bool cancel1 = ((getDegrees(0) >= MAX_RANGE_MAIN) && speed > 0);
+            bool cancel2 = (isLimit(0) && speed < 0);
+            if (!(cancel1 || cancel2))
+            {
+                Shoulder_Motor.Set(ControlMode::PercentOutput, speed); 
+            }
+            else
+            {
+                Shoulder_Motor.Set(ControlMode::PercentOutput, 0);
+            }
+            frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
+            frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
         }
-        else
+        else if (axisID == 1)
         {
-            Main_Axis.Set(ControlMode::PercentOutput, 0);
+            bool cancel1 = ((getDegrees(1) >= MAX_RANGE_SECONDARY) && speed > 0);
+            bool cancel2 = (isLimit(1) && speed < 0);
+            if (!(cancel1 || cancel2))
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, speed); 
+            }
+            else
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, 0);
+            }
+            frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
+            frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
         }
-        frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
-        frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
-    }
-    else if (axisID == 1)
-    {
-        bool cancel1 = ((getDegrees(1) >= MAX_RANGE_SECONDARY) && speed > 0);
-        bool cancel2 = (isLimit(1) && speed < 0);
-        if (!(cancel1 || cancel2))
+        /*
+        else if (axisID == 2)
         {
-            Secondary_Axis.Set(ControlMode::PercentOutput, speed); 
+            bool cancel1 = ((getDegrees(2) >= MAX_RANGE_WRIST) && speed > 0);
+            bool cancel2 = (isLimit(2) && speed < 0);
+            if (!(cancel1 || cancel2))
+            {
+                Wrist_Axis.Set(ControlMode::PercentOutput, speed); 
+            }
+            else
+            {
+                Wrist_Axis.Set(ControlMode::PercentOutput, 0);
+            }
+            frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
+            frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
         }
-        else
-        {
-            Secondary_Axis.Set(ControlMode::PercentOutput, 0);
-        }
-        frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
-        frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
-    }
-   /*
-    else if (axisID == 2)
-    {
-        bool cancel1 = ((getDegrees(2) >= MAX_RANGE_WRIST) && speed > 0);
-        bool cancel2 = (isLimit(2) && speed < 0);
-        if (!(cancel1 || cancel2))
-        {
-            Wrist_Axis.Set(ControlMode::PercentOutput, speed); 
-        }
-        else
-        {
-            Wrist_Axis.Set(ControlMode::PercentOutput, 0);
-        }
-        frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
-        frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
-    }
-    */
-
-   
-}
-
-void frc::Manipulator::manipSetToDegrees(double degrees, int axisID)
-{
-    double currentDegrees = getDegrees(axisID);
-    if ((axisID == 0) && !(isLimit(0) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_MAIN)) //Prevents movement to unsafe areas
-    {
-        double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03) + 1)) * .3) + .1;
-        if ((degrees - currentDegrees) > 1.5)
-        {
-            manipSet(speed, 0);
-        }
-        else if ((degrees - currentDegrees) < -1.5)
-        {
-            manipSet(-speed, 0);
-        }
-        else
-        {
-            manipSet(0, 0);
-        }
-    }
-    else if ((axisID == 1) && !(isLimit(1) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_SECONDARY))
-    {
-        double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1)) * .3) + .1;
-        if ((degrees - currentDegrees) > 0.5)
-        {
-            manipSet(speed, 1);
-        }
-        else if ((degrees - currentDegrees) < -0.5)
-        {
-            manipSet(-speed, 1);
-        }
-        else
-        {
-            manipSet(0, 1);
-        }
+        */
+    
     }
     else
     {
-        manipSet(0, axisID);
+        std::cout << "Limits don't exist!" << std::endl;
+        if (axisID == 0)
+        {
+            bool cancel1 = ((getDegrees(0, rawHome) >= MAX_RANGE_MAIN) && speed > 0);
+            bool cancel2 = (getRawUnits(0) > rawHome && speed < 0);
+            if (!(cancel1 || cancel2))
+            {
+                Shoulder_Motor.Set(ControlMode::PercentOutput, speed); 
+            }
+            else
+            {
+                Shoulder_Motor.Set(ControlMode::PercentOutput, 0);
+            }
+            frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
+            frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
+        }
+        else if (axisID == 1)
+        {
+            bool cancel1 = ((getDegrees(1, rawHome) >= MAX_RANGE_SECONDARY) && speed > 0);
+            bool cancel2 = (getRawUnits(1) < rawHome && speed < 0);
+            if (!(cancel1 || cancel2))
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, speed); 
+            }
+            else
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, 0);
+            }
+            frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
+            frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
+        }
+        /*
+        else if (axisID == 2)
+        {
+            bool cancel1 = ((getDegrees(2, rawHome) >= MAX_RANGE_WRIST) && speed > 0);
+            bool cancel2 = (getRawUnits(2) < rawHome && speed < 0);
+            if (!(cancel1 || cancel2))
+            {
+                Wrist_Axis.Set(ControlMode::PercentOutput, speed); 
+            }
+            else
+            {
+                Wrist_Axis.Set(ControlMode::PercentOutput, 0);
+            }
+            frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
+            frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
+        }
+        */
     }
     
 }
 
-
-
-/*
-//It works, at least for 45 degrees tested (further tuning may be needed)
-void frc::Manipulator::manipSetPID(double degrees, int axisID) //Moves Manipulator to a set degree with PID
+void frc::Manipulator::manipSetToDegrees(double degrees, int axisID, bool areLimits, double rawHome)
 {
-    //3649 per half rotation
-    if (axisID == 0)
+    double currentDegrees;
+    if (areLimits)
     {
-        bool cancel1 = (degrees >= MAX_RANGE_MAIN);
-        bool cancel2 = (isLimit(0) && (degrees < getDegrees(0)));
-        double encoderCounts = (ENCODER_COUNTS_PER_ROTATION_MAIN / 180) * degrees;
-        frc::SmartDashboard::PutNumber("PostEnc: ", encoderCounts);
-        if (!(cancel1 || cancel2))
-        {   
-            frc::SmartDashboard::PutNumber("Should be same: ", encoderCounts);        
-            Main_Axis.Set(ControlMode::Position, encoderCounts); 
-        }
-        frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
-        frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
-    }
-    else if (axisID == 1)
-    {
-        bool cancel1 = (degrees >= MAX_RANGE_SECONDARY);
-        bool cancel2 = (isLimit(1) && (degrees < getDegrees(1)));
-        double encoderCounts = (ENCODER_COUNTS_PER_ROTATION_SECONDARY / 180) * degrees;
-        if (!(cancel1 || cancel2))
+        currentDegrees = getDegrees(axisID);
+        if ((axisID == 0) && !(isLimit(0) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_MAIN)) //Prevents movement to unsafe areas
         {
-            Secondary_Axis.Set(ControlMode::Position, encoderCounts); 
+            double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03) + 1)) * .3) + .1;
+            if ((degrees - currentDegrees) > 1.5)
+            {
+                manipSet(speed, 0);
+            }
+            else if ((degrees - currentDegrees) < -1.5)
+            {
+                manipSet(-speed, 0);
+            }
+            else
+            {
+                manipSet(0, 0);
+            }
         }
-        frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
-        frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
-    }
-
-   /*
-    else if (axisID == 2)
-    {
-        bool cancel1 = (degrees >= MAX_RANGE_WRIST);
-        bool cancel2 = (isLimit(2) && (degrees < getDegrees(2)));
-        double encoderCounts = (ENCODER_COUNTS_PER_ROTATION_WRIST / 180) * degrees;
-        if (!(cancel1 || cancel2))
+        else if ((axisID == 1) && !(isLimit(1) && (degrees < currentDegrees)) && (degrees < MAX_RANGE_SECONDARY))
         {
-            Wrist_Axis.Set(ControlMode::Position, encoderCounts); 
+            double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1)) * .3) + .1;
+            if ((degrees - currentDegrees) > 0.5)
+            {
+                manipSet(speed, 1);
+            }
+            else if ((degrees - currentDegrees) < -0.5)
+            {
+                manipSet(-speed, 1);
+            }
+            else
+            {
+                manipSet(0, 1);
+            }
         }
-        frc::SmartDashboard::PutBoolean("Canceler Logic 1 (Max)", cancel1);
-        frc::SmartDashboard::PutBoolean("Canceler Logic 2 (Limit)", cancel2);
+        else
+        {
+            manipSet(0, axisID);
+        }
+    }
+    else
+    {
+        currentDegrees = getDegrees(axisID, rawHome);
+        if ((axisID == 0) && !(getRawUnits(0) > rawHome && (degrees < currentDegrees)) && (degrees < MAX_RANGE_MAIN)) //Prevents movement to unsafe areas
+        {
+            double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03) + 1)) * .3) + .1;
+            if ((degrees - currentDegrees) > 1.5)
+            {
+                manipSet(speed, 0, false, rawHome);
+            }
+            else if ((degrees - currentDegrees) < -1.5)
+            {
+                manipSet(-speed, 0, false, rawHome);
+            }
+            else
+            {
+                manipSet(0, 0, false, rawHome);
+            }
+        }
+        else if ((axisID == 1) && !(getRawUnits(1) < rawHome && (degrees < currentDegrees)) && (degrees < MAX_RANGE_SECONDARY))
+        {
+            double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1)) * .3) + .1;
+            if ((degrees - currentDegrees) > 0.5)
+            {
+                manipSet(speed, 1, false, rawHome);
+            }
+            else if ((degrees - currentDegrees) < -0.5)
+            {
+                manipSet(-speed, 1, false, rawHome);
+            }
+            else
+            {
+                manipSet(0, 1, false, rawHome);
+            }
+        }
     }
 }
-*/
+
 bool frc::Manipulator::isLimit(int axisID) //Returns if a limit switch is activated - Opposite logic due to wiring
 {
     if (axisID == 0)
     {
-        return !Main_Axis_Limit_Switch.Get();
+        return !Shoulder_Motor_Limit_Switch.Get();
     }
     else if (axisID == 1)
     {
-        return !Secondary_Axis_Limit_Switch.Get();   
+        return !Elbow_Motor_Limit_Switch.Get();   
     }
     /*
     else if (axisID == 2)
@@ -177,24 +222,22 @@ bool frc::Manipulator::isLimit(int axisID) //Returns if a limit switch is activa
     return true;
 }
 
-double frc::Manipulator::getDegrees(int axisID) //Returns degrees from an encoder converting from raw counts
+double frc::Manipulator::getRawUnits(int axisID)
 {
     if (axisID == 0)
     {
-        double degrees =  Main_Axis.GetSelectedSensorPosition(0) / TO_DEGREES_MAIN;
-        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN - degrees, 360));   
+        return Shoulder_Motor.GetSelectedSensorPosition(0);
     }
-    else if (axisID == 1) //Needs changing
+    else if (axisID == 1)
     {
-        double degrees =  Secondary_Axis.GetSelectedSensorPosition(0) / TO_DEGREES_SECONDARY;
-        return abs(fmod(degrees + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY, 360));   
+        return Elbow_Motor.GetSelectedSensorPosition(0);
     }
     /*
     else if (axisID == 2)
     {
-        double degrees = Wrist_Axis.GetSelectedSensorPosition(0) / TO_DEGREES_WRIST;
-        return abs(fmod(degrees, 360)) + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST;   
-    }*/
+        return Wrist_Motor.GetSelectedSensorPosition(0);
+    }
+    */
     else
     {
         return 0;
@@ -202,15 +245,39 @@ double frc::Manipulator::getDegrees(int axisID) //Returns degrees from an encode
     
 }
 
+double frc::Manipulator::getDegrees(int axisID, double rawHome) //Returns degrees from an encoder converting from raw counts
+{
+    if (axisID == 0)
+    {
+        double degrees = (rawHome + getRawUnits(0)) / TO_DEGREES_MAIN;
+        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN - degrees, 360));   
+    }
+    else if (axisID == 1) //Needs changing
+    {
+        double degrees = (rawHome + getRawUnits(1)) / TO_DEGREES_SECONDARY;
+        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY + degrees, 360));   
+    }
+    /*
+    else if (axisID == 2)
+    {
+        double degrees = (rawHome + getRawUnits(2) / TO_DEGREES_WRIST;
+        return abs(fmod(degrees, 360)) + DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST;   
+    }*/
+    else
+    {
+        return 0;
+    }   
+}
+
 void frc::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 degrees
 {
     if (axisID == 0)
     {
-        Main_Axis.SetSelectedSensorPosition(0, 0, 0);
+        Shoulder_Motor.SetSelectedSensorPosition(0, 0, 0);
     }
     else if (axisID == 1)
     {
-        Secondary_Axis.SetSelectedSensorPosition(0, 0, 0);
+        Elbow_Motor.SetSelectedSensorPosition(0, 0, 0);
     }
     /*
     else if (axisID == 1)
@@ -221,16 +288,18 @@ void frc::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 degree
    
 }
 
-void frc::Manipulator::resetToEncoder(int axisID)
+bool frc::Manipulator::resetToEncoder(int axisID)
 {
     if (!isLimit(axisID))
     {
         manipSet(-0.35 , axisID);
+        return false;
     }
     else
     {
         resetDegrees(axisID);
         manipSet(0, axisID);
+        return true;
     }
 }
 //Positive = down, negative = up
@@ -239,30 +308,30 @@ void frc::Manipulator::initializePID(bool firstTime) //Initializes the PID funct
 {
     if (firstTime)
     {
-        Main_Axis.ConfigSelectedFeedbackSensor(QuadEncoder, 0, 0);
-        Main_Axis.SetSensorPhase(true);
-        Main_Axis.ConfigNominalOutputForward(0, 30);
-        Main_Axis.ConfigNominalOutputReverse(0, 30);
-        Main_Axis.ConfigPeakOutputForward(1, 30);
-        Main_Axis.ConfigPeakOutputReverse(-1, 30);
+        Shoulder_Motor.ConfigSelectedFeedbackSensor(QuadEncoder, 0, 0);
+        Shoulder_Motor.SetSensorPhase(true);
+        Shoulder_Motor.ConfigNominalOutputForward(0, 30);
+        Shoulder_Motor.ConfigNominalOutputReverse(0, 30);
+        Shoulder_Motor.ConfigPeakOutputForward(1, 30);
+        Shoulder_Motor.ConfigPeakOutputReverse(-1, 30);
     }   
-    Main_Axis.Config_kP(0, PID_P_MAIN, 30);
-    Main_Axis.Config_kI(0, PID_I_MAIN, 30);
-    Main_Axis.Config_kD(0, PID_D_MAIN, 30);
-    Main_Axis.Config_kF(0, PID_F_MAIN, 30);
+    Shoulder_Motor.Config_kP(0, PID_P_MAIN, 30);
+    Shoulder_Motor.Config_kI(0, PID_I_MAIN, 30);
+    Shoulder_Motor.Config_kD(0, PID_D_MAIN, 30);
+    Shoulder_Motor.Config_kF(0, PID_F_MAIN, 30);
     if (firstTime)
     {
-        Secondary_Axis.ConfigSelectedFeedbackSensor(QuadEncoder, 0, 0);
-        Secondary_Axis.SetSensorPhase(true);
-        Secondary_Axis.ConfigNominalOutputForward(0, 30);
-        Secondary_Axis.ConfigNominalOutputReverse(0, 30);
-        Secondary_Axis.ConfigPeakOutputForward(1, 30);
-        Secondary_Axis.ConfigPeakOutputReverse(-1, 30);
+        Elbow_Motor.ConfigSelectedFeedbackSensor(QuadEncoder, 0, 0);
+        Elbow_Motor.SetSensorPhase(true);
+        Elbow_Motor.ConfigNominalOutputForward(0, 30);
+        Elbow_Motor.ConfigNominalOutputReverse(0, 30);
+        Elbow_Motor.ConfigPeakOutputForward(1, 30);
+        Elbow_Motor.ConfigPeakOutputReverse(-1, 30);
     }   
-    Secondary_Axis.Config_kP(0, PID_P_SECONDARY, 30);
-    Secondary_Axis.Config_kI(0, PID_I_SECONDARY, 30);
-    Secondary_Axis.Config_kD(0, PID_D_SECONDARY, 30);
-    Secondary_Axis.Config_kF(0, PID_F_SECONDARY, 30);
+    Elbow_Motor.Config_kP(0, PID_P_SECONDARY, 30);
+    Elbow_Motor.Config_kI(0, PID_I_SECONDARY, 30);
+    Elbow_Motor.Config_kD(0, PID_D_SECONDARY, 30);
+    Elbow_Motor.Config_kF(0, PID_F_SECONDARY, 30);
    /*
     if (firstTime)
     {
@@ -395,18 +464,38 @@ double frc::Manipulator::getAngleForCoordinates(double x, double y, int axisID) 
     */
 }
 
-void frc::Manipulator::moveToCoordinates(double x, double y) //Moves both axes to the angles necessary to reach the given coordinates
+void frc::Manipulator::moveToCoordinates(double x, double y, bool areLimits, double rawHomeShoulder, double rawHomeElbow) //Moves both axes to the angles necessary to reach the given coordinates
 {
-    manipSetToDegrees(getAngleForCoordinates(x,y,0), 0);
-    manipSetToDegrees(getAngleForCoordinates(x,y,1), 1);
+    if (isPossible(x,y))
+    {
+        if (areLimits)
+        {
+            manipSetToDegrees(getAngleForCoordinates(x,y,0), 0);
+            manipSetToDegrees(getAngleForCoordinates(x,y,1), 1);
+        }
+        else
+        {
+            manipSetToDegrees(getAngleForCoordinates(x,y,0), 0, false, rawHomeShoulder);
+            manipSetToDegrees(getAngleForCoordinates(x,y,1), 1, false, rawHomeElbow);
+        }
+    }  
 }
 bool frc::Manipulator::isPossible(double x, double y)
 {
     double angle1 = getAngleForCoordinates(x,y,0);
     double angle2 = getAngleForCoordinates(x,y,1);
+    //Checks if angles are attainable
     if (((angle1 < MAX_RANGE_MAIN) && (angle1 > DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN)) && ((angle1 < MAX_RANGE_MAIN) && (angle1 > DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN)))
     {
+        //Checks if distance is too far (will incur penalties)
         return true;
+        /*
+        if (x < -30)
+        {
+            return true;
+        }
+        */
+        
     }
     return false;
 }

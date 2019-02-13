@@ -1,16 +1,20 @@
 /*
-  2/11/19
+  2/12/19
   Code is currently functional, but possibly not optimized
-  Speed is currently hardcoded to .25 to protect prototype, but the commented function is better given a better prototype
-  Three test cases (low, medium, high) are maintain x-axis pretty well (within .2 inches)
+  Speed is currently hardcoded to .25 to protect prototype, but the commented speed function is better given a better prototype
+  Three test cases (low, medium, high) all maintain x-axis pretty well (within .2 inches)
 
   TODO
-  - Rename axes (enum)
-  - Remane motors
   - Go away from limit switches and start from a known
+  * Limits work within normal functions, but break during planned movement (coordinates)
   - Add isPossible to rest of code (add hard limit for distance of 30 inches)
   - (If time, work on paths)
+
+
+  Note:
+  Code without limits CANNOT use DEGREES_BETWEEN constants also!
 */
+
 #include "Robot.h"
 #include "Blitz_Joystick.hpp"
 #include "Manipulator.hpp"
@@ -19,122 +23,169 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 
+//Test Variable -> true for limit switches, false for pre-set known
+bool areLimits = false;
+
+//if the previous variable is true, these variables are relevant
+bool initialReset = true;
+
+//if the previous variable is false, these variables are relevant
+double homeEncoderValueShoulder, homeEncoderValueElbow;
+
 frc::Manipulator Manip;
 frc::Blitz_Joystick Blitz_Joy;
 double rotateDegreesMain, rotateDegreesSecondary;//, rotateDegreesWrist;
-bool isMain = true;
-double xPos = 9.25;
-double yPos = 0;
+double yAxisShoulder, yAxisElbow;
 
-void Robot::RobotInit() 
-{
-}
-
-void Robot::RobotPeriodic() 
-{
-  
-}
-
+void Robot::RobotInit() {}
+void Robot::RobotPeriodic() {}
 void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
-void Robot::TeleopInit() {
+void Robot::TeleopInit() 
+{
   Manip.initializePID(true); //PID is initialized
+  if (!areLimits) //It is assumed that the robot is set in the home position (both axes are at about 90 degrees)
+  {
+    homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
+    homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
+    frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
+    frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueShoulder);
+  }
 }
 //Highly recommended to reset to encoder both axes before starting
 void Robot::TeleopPeriodic() {
-  double yAxisMain = Blitz_Joy.getAxis(1,0); 
-  double yAxisSecondary = Blitz_Joy.getAxis(1,1);
-
-  if (Blitz_Joy.getButton(3, 0))
+  if (areLimits) //Code for presence of limit switches
   {
-    Manip.moveToCoordinates(10, -3.5); //Low
-  }
-  else if (Blitz_Joy.getButton(4,0))
-  {
-    Manip.moveToCoordinates(10, 3); //Mid
-  }
-  else if (Blitz_Joy.getButton(5,0))
-  {
-    Manip.moveToCoordinates(10, 8); //High
-  }
-  else
-  {
-    //Main Axis
-    if (Blitz_Joy.getButton(1,0)) //Reset To Encoder
+    if (initialReset)
     {
-      Manip.resetToEncoder(0);
-    }
-    else if (Blitz_Joy.getButton(2,0))
-    {
-      Manip.manipSetToDegrees(180, 0);
+      if (Manip.resetToEncoder(Shoulder_Axis) && Manip.resetToEncoder(Elbow_Axis))
+      {
+        initialReset = false;
+      }
     }
     else
     {
-      if (yAxisMain > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisMain < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+      yAxisShoulder = Blitz_Joy.getAxis(Y_Axis, Shoulder_Joystick); 
+      yAxisElbow = Blitz_Joy.getAxis(Y_Axis, Elbow_Joystick);
+
+      if (Blitz_Joy.getButton(3, Shoulder_Joystick))
       {
-        Manip.manipSet(yAxisMain,0);
+        Manip.moveToCoordinates(10, -3.5); //Low
+      }
+      else if (Blitz_Joy.getButton(4, Shoulder_Joystick))
+      {
+        Manip.moveToCoordinates(10, 3); //Mid
+      }
+      else if (Blitz_Joy.getButton(5, Shoulder_Joystick))
+      {
+        Manip.moveToCoordinates(10, 8); //High
       }
       else
       {
-        Manip.manipSet(0,0);
+        //Main Axis
+        if (Blitz_Joy.getButton(1, Shoulder_Joystick)) //Reset To Encoder
+        {
+          Manip.resetToEncoder(Shoulder_Axis);
+        }
+        else if (Blitz_Joy.getButton(2, Shoulder_Joystick))
+        {
+          Manip.manipSetToDegrees(180, Shoulder_Axis);
+        }
+        else
+        {
+          if (yAxisShoulder > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisShoulder < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+          {
+            Manip.manipSet(yAxisShoulder, Shoulder_Axis);
+          }
+          else
+          {
+            Manip.manipSet(Off, Shoulder_Axis);
+          }
+        }
+
+        //Secondary Axis
+        if (Blitz_Joy.getButton(1, Elbow_Joystick))
+        {
+          Manip.resetToEncoder(Elbow_Axis);
+        }
+        else if (Blitz_Joy.getButton(2, Elbow_Joystick))
+        {
+          Manip.manipSetToDegrees(180, Elbow_Axis);
+        }
+        else
+        {
+          if (yAxisElbow > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisElbow < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+          {
+            Manip.manipSet(yAxisElbow, Elbow_Axis);
+          }
+          else
+          {
+            Manip.manipSet(Off, Elbow_Axis);
+          }
+        }
       }
     }
+  }
+  else //Code for lack of limit switches
+  {
+    yAxisShoulder = Blitz_Joy.getAxis(Y_Axis, Shoulder_Joystick); 
+    yAxisElbow = Blitz_Joy.getAxis(Y_Axis, Elbow_Joystick);
 
-    //Secondary Axis
-    if (Blitz_Joy.getButton(1,1))
+    if (Blitz_Joy.getButton(3, Shoulder_Joystick))
     {
-      Manip.resetToEncoder(1);
+      Manip.moveToCoordinates(10, -3.5, false, homeEncoderValueShoulder, homeEncoderValueElbow); //Low
     }
-    else if (Blitz_Joy.getButton(2,1))
+    else if (Blitz_Joy.getButton(4, Shoulder_Joystick))
     {
-      Manip.manipSetToDegrees(180, 1);
+      Manip.moveToCoordinates(10, 3, false, homeEncoderValueShoulder, homeEncoderValueElbow); //Mid
+    }
+    else if (Blitz_Joy.getButton(5, Shoulder_Joystick))
+    {
+      Manip.moveToCoordinates(10, 8, false, homeEncoderValueShoulder, homeEncoderValueElbow); //High
     }
     else
     {
-      if (yAxisSecondary > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisSecondary < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+      //Main Axis
+      if (Blitz_Joy.getButton(2, Shoulder_Joystick))
       {
-        Manip.manipSet(yAxisSecondary,1);
+        Manip.manipSetToDegrees(180, Shoulder_Axis, false, homeEncoderValueShoulder);
       }
       else
       {
-        Manip.manipSet(0,1);
+        if (yAxisShoulder > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisShoulder < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+        {
+          Manip.manipSet(yAxisShoulder, Shoulder_Axis, false, homeEncoderValueShoulder);
+        }
+        else
+        {
+          Manip.manipSet(Off, Shoulder_Axis, false, homeEncoderValueShoulder);
+        }
+      }
+
+      //Secondary Axis
+      if (Blitz_Joy.getButton(2, Elbow_Joystick))
+      {
+        Manip.manipSetToDegrees(180, Elbow_Axis, false, homeEncoderValueElbow);
+      }
+      else
+      {
+        if (yAxisElbow > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisElbow < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+        {
+          Manip.manipSet(yAxisElbow, Elbow_Axis, false, homeEncoderValueElbow);
+        }
+        else
+        {
+          Manip.manipSet(Off, Elbow_Axis, false, homeEncoderValueElbow);
+        }
       }
     }
   }
   
-  frc::SmartDashboard::PutNumber("Degrees Main", Manip.getDegrees(0));
-  frc::SmartDashboard::PutNumber("Raw Encoder Main", Manip.Main_Axis.GetSelectedSensorPosition(0));
-  frc::SmartDashboard::PutNumber("Degrees Secondary", Manip.getDegrees(1));
-  frc::SmartDashboard::PutNumber("Raw Encoder Secondary", Manip.Secondary_Axis.GetSelectedSensorPosition(0));
-  frc::SmartDashboard::PutNumber("X-Pos", xPos);
-  frc::SmartDashboard::PutNumber("Y-Pos", yPos);
+  frc::SmartDashboard::PutNumber("Shoulder Motor Degrees", Manip.getDegrees(Shoulder_Axis));
+  frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
+  frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis));
+  frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
 
-/*
-  frc::SmartDashboard::PutNumber("TestEnc", Manip.Main_Axis.GetSelectedSensorPosition(0));
-  frc::SmartDashboard::PutNumber("Y-Axis", yAxis);
-  frc::SmartDashboard::PutBoolean("IsResetButton", Blitz_Joy.getButton(1));
-  frc::SmartDashboard::PutBoolean("IsLimitSwitch-Main", Manip.isLimit(0));
-  frc::SmartDashboard::PutNumber("Rotate Degrees - Main", rotateDegreesMain);
-  frc::SmartDashboard::PutNumber("Rotate Degrees - Secondary", rotateDegreesSecondary);
-  frc::SmartDashboard::PutNumber("Real Degrees - Main", Manip.getDegrees(0));
-  frc::SmartDashboard::PutNumber("Real Degrees - Secondary", Manip.getDegrees(1));
-  //frc::SmartDashboard::PutNumber("Rotate Degrees - Wrist", rotateDegreesWrist);
-  frc::SmartDashboard::PutBoolean("IsLimitSwitch-Secondary", Manip.isLimit(1));
-  frc::SmartDashboard::PutNumber("P-Main", Manip.getP(0));
-  frc::SmartDashboard::PutNumber("I-Main", Manip.getI(0));
-  frc::SmartDashboard::PutNumber("D-Main", Manip.getD(0));
-  frc::SmartDashboard::PutNumber("F-Main", Manip.getF(0));
-  frc::SmartDashboard::PutNumber("P-Secondary", Manip.getP(1));
-  frc::SmartDashboard::PutNumber("I-Secondary", Manip.getI(1));
-  frc::SmartDashboard::PutNumber("D-Secondary", Manip.getD(1));
-  frc::SmartDashboard::PutNumber("F-Secondary", Manip.getF(1));
-  //frc::SmartDashboard::PutNumber("P-Wrist", Manip.getP(2));
-  //frc::SmartDashboard::PutNumber("I-Wrist", Manip.getI(2));
-  //frc::SmartDashboard::PutNumber("D-Wrist", Manip.getD(2));
-  //frc::SmartDashboard::PutNumber("F-Wrist", Manip.getF(2));
-  frc::SmartDashboard::PutBoolean("isMain", isMain);
-  std::cout << "End of RobotPeriodic: " << rotateDegreesMain << std::endl;
-  */
   frc::Wait(0.005);
 }
 void Robot::TestPeriodic() {

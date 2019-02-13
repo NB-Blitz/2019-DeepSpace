@@ -1,5 +1,24 @@
+/*
+
+*/
+
+
+
 #ifndef SRC_MANIPULATOR_HPP_
 #define SRC_MANIPULATOR_HPP_
+
+enum armAxis
+{ 
+  Shoulder_Axis = 0,
+  Elbow_Axis = 1,
+  Wrist_Axis = 2
+};
+
+enum customSpeed
+{
+  Off = 0,
+  Max = 1
+};
 
 #include "frc/WPILib.h"
 #include "ctre/Phoenix.h"
@@ -9,8 +28,6 @@ namespace frc
     class Manipulator
     {
         private:
-            
-
             //For Main Axis
             const double MAX_RANGE_MAIN = 270;
             const double LENGTH_MAIN = 9.5; //in inches
@@ -60,24 +77,25 @@ namespace frc
             double PID_F_WRIST = 0;
             */
 
+           TalonSRX Shoulder_Motor, Elbow_Motor;// Wrist_Motor;
+           DigitalInput Shoulder_Motor_Limit_Switch, Elbow_Motor_Limit_Switch;//, Wrist_Motor_Limit_Switch; 
+
         public:
-            TalonSRX Main_Axis, Secondary_Axis;// Wrist_Axis;
-            DigitalInput Main_Axis_Limit_Switch, Secondary_Axis_Limit_Switch;//, Wrist_Axis_Limit_Switch; 
             Manipulator();
-            void manipSet(double speed, int axisID); //PercentageOutput (No PID)
-            void manipSetToDegrees(double degrees, int axisID);
+            void manipSet(double speed, int axisID, bool areLimits = true, double rawHome = 0); //PercentageOutput (No PID)
+            void manipSetToDegrees(double degrees, int axisID, bool areLimits = true, double rawHome = 0);
             bool isLimit(int axisID);
-            double getDegrees(int axisID); //0 is Main, 1 is Secondary...
+            double getRawUnits(int axisID);
+            double getDegrees(int axisID, double rawHome = 0); //0 is Main, 1 is Secondary...
             void resetDegrees(int axisID); //See above
-            void resetToEncoder(int axisID);
+            bool resetToEncoder(int axisID); //bool returns if the motor and its encoder is reset
             void initializePID(bool firstTime);
             double getP(int axisID);
             double getI(int axisID);
             double getD(int axisID);
             double getF(int axisID);
-            //void updatePIDCoefficients();
             double getAngleForCoordinates(double x, double y, int axisID); //used by next method
-            void moveToCoordinates(double x, double y); //In inches
+            void moveToCoordinates(double x, double y, bool areLimits = true, double rawHomeShoulder = 0, double rawHomeElbow = 0); //In inches
             bool isPossible(double x, double y);
             //double getAngleForParallel(double x, double y); 
             //void moveToParallel(double x, double y);
