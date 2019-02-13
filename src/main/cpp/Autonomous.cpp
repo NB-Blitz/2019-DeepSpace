@@ -13,7 +13,8 @@ bool Blitz::Autonomous::DriveToBall(Blitz::Models::MecanumInput *Input)
 
     double XInput = 0;
     double YInput = -(BallDist - 35) / 120;
-    double ZInput = pow(XCenterDist / 176, 3)/2.5;
+    //double ZInput = pow(XCenterDist / 176, 3)/2.5;
+    double ZInput = pow(XCenterDist/176, 1.8)/2;
 
     if(BallDist == 0)
     {
