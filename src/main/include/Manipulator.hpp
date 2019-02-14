@@ -15,14 +15,15 @@ namespace Blitz
             void MoveManipulatorSpeed(double speed);
             void MoveManipulatorPosition(double diameter);
 
-        private:
-            const int SMALL_GEAR_TEETH = 24;
-            const int LARGE_GEAR_TEETH = 57;
-            const int PULSES_PER_ROTATION = 90;
-
-            const double PULSES_PER_ANGLE_SMALL_GEAR = 360/((SMALL_GEAR_TEETH/LARGE_GEAR_TEETH) * PULSES_PER_ROTATION);
-
             double currentPosition = 0;
+
+        private:
+            const double SMALL_GEAR_TEETH = 24;
+            const double LARGE_GEAR_TEETH = 57;
+            const double PULSES_PER_ROTATION = 180;
+
+            const double PULSES_PER_ANGLE_SMALL_GEAR = ((PULSES_PER_ROTATION/LARGE_GEAR_TEETH) * SMALL_GEAR_TEETH)/360;
+
             int direction = 1;
 
             frc::DigitalInput LimitSwitch;

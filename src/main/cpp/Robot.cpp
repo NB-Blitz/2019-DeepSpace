@@ -33,12 +33,18 @@ void Robot::OperatorControl()
     }
     else if(Xbox.BButton)
     {
-      Claw.MoveManipulatorPosition(5);
+      Claw.MoveManipulatorPosition(13);
+    }
+    else if(Xbox.YButton)
+    {
+      Claw.MoveManipulatorPosition(12);
     }
     else
     {
       Claw.MoveManipulatorSpeed(Xbox.LeftY);
     }
+    
+    frc::SmartDashboard::PutNumber("Counter", Claw.currentPosition);
 
     frc::Wait(0.005);
   }
