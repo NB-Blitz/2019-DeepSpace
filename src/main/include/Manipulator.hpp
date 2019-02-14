@@ -1,9 +1,3 @@
-/*
-
-*/
-
-
-
 #ifndef SRC_MANIPULATOR_HPP_
 #define SRC_MANIPULATOR_HPP_
 
@@ -29,18 +23,18 @@ namespace frc
     {
         private:
             //For Main Axis
-            const double MAX_RANGE_MAIN = 270;
-            const double LENGTH_MAIN = 9.5; //in inches
-            const double ENCODER_COUNTS_PER_ROTATION_MAIN = 7800;
-            const double TO_DEGREES_MAIN = ENCODER_COUNTS_PER_ROTATION_MAIN / 360;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_MAIN = 80; //True Zero = faces parallel to ground and faces forward
+            const double MAX_RANGE_SHOULDER = 270;
+            const double LENGTH_SHOULDER = 9.5; //in inches
+            const double ENCODER_COUNTS_PER_ROTATION_SHOULDER = 7800;
+            const double TO_DEGREES_SHOULDER = ENCODER_COUNTS_PER_ROTATION_SHOULDER / 360;
+            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER = 80; //True Zero = faces parallel to ground and faces forward
 
             //For Secondary Axis
-            const double MAX_RANGE_SECONDARY = 270;
-            const double LENGTH_SECONDARY = 4.5; //In inches
-            const double ENCODER_COUNTS_PER_ROTATION_SECONDARY = 9000;
-            const double TO_DEGREES_SECONDARY = ENCODER_COUNTS_PER_ROTATION_SECONDARY / 360;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SECONDARY = 90; //True Zero = faces previous axis
+            const double MAX_RANGE_ELBOW = 270;
+            const double LENGTH_ELBOW = 4.5; //In inches
+            const double ENCODER_COUNTS_PER_ROTATION_ELBOW = 9000;
+            const double TO_DEGREES_ELBOW = ENCODER_COUNTS_PER_ROTATION_ELBOW / 360;
+            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW = 90; //True Zero = faces previous axis
 
             /*
             //For Wrist Axis
@@ -58,28 +52,36 @@ namespace frc
            */
 
             //PID Coefficients for Main
-            double PID_P_MAIN = 0.5;
-            double PID_I_MAIN = 0; 
-            double PID_D_MAIN = 0;
-            double PID_F_MAIN = 0;
+            double PID_P_SHOULDER = 0.5;
+            double PID_I_SHOULDER = 0; 
+            double PID_D_SHOULDER = 0;
+            double PID_F_SHOULDER = 0;
 
             //PID Coefficients for Secondary
-            double PID_P_SECONDARY = 0.25;
-            double PID_I_SECONDARY = 0; 
-            double PID_D_SECONDARY = 0;
-            double PID_F_SECONDARY = 0;
+            double PID_P_ELBOW = 0.25;
+            double PID_I_ELBOW = 0; 
+            double PID_D_ELBOW = 0;
+            double PID_F_ELBOW = 0;
 
-           /*
+            /*
             //PID Coefficients for Wrist
             double PID_P_WRIST = 0.25;
             double PID_I_WRIST = 0; 
             double PID_D_WRIST = 0;
             double PID_F_WRIST = 0;
             */
+           
+            //Dimensions of robot (for isPossible frc rules)
+            /*
+            
+            */
 
-           TalonSRX Shoulder_Motor, Elbow_Motor;// Wrist_Motor;
-           DigitalInput Shoulder_Motor_Limit_Switch, Elbow_Motor_Limit_Switch;//, Wrist_Motor_Limit_Switch; 
-
+            TalonSRX Shoulder_Motor, Elbow_Motor;// Wrist_Motor;
+            DigitalInput Shoulder_Motor_Limit_Switch, Elbow_Motor_Limit_Switch;//, Wrist_Motor_Limit_Switch; 
+            //AnalogPotentiometer Shoulder_Pot, Elbow_Pot, Wrist_Pot;
+            //const double SHOULDER_POT_OFFSET = 0;
+            //const double ELBOW_POT_OFFSET = 0;
+            //const double WRIST_POT_OFFSET = 0;
         public:
             Manipulator();
             void manipSet(double speed, int axisID, bool areLimits = true, double rawHome = 0); //PercentageOutput (No PID)

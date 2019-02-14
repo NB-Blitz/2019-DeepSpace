@@ -1,32 +1,32 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 #pragma once
 
-#include <string>
-
-#include <frc/IterativeRobot.h>
-#include <frc/smartdashboard/SendableChooser.h>
 #include <frc/WPILib.h>
+#include <BlitzLib/BlitzLib.hpp>
+#include <ctre/Phoenix.h>
+#include <Manipulator.hpp>
+#include <Blitz_Joystick.hpp>
 
-#include "ctre/Phoenix.h"
 
-class Robot : public frc::IterativeRobot {
- public:
-  void RobotInit() override;
-  void RobotPeriodic() override;
-  void AutonomousInit() override;
-  void AutonomousPeriodic() override;
-  void TeleopInit() override;
-  void TeleopPeriodic() override;
-  void TestPeriodic() override;
+class Robot : public frc::SampleRobot 
+{
+    public:
+        Robot();
+        void RobotInit() override;
+        void Autonomous() override;
+        void OperatorControl() override;
+        void Test() override;
 
- private:
-  frc::Joystick joy{0};
-  TalonSRX motor{6};
-  frc::DigitalInput limit{0};
+    private:
+
+        //Test Variable -> true for limit switches, false for pre-set known
+        bool areLimits = true;
+
+        //if the previous variable is true, these variables are relevant
+        bool initialReset = false;
+
+        //if the previous variable is false, these variables are relevant
+        double homeEncoderValueShoulder, homeEncoderValueElbow;
+        double yAxisShoulder, yAxisElbow;
+        frc::Manipulator Manip;
+        frc::Blitz_Joystick Blitz_Joy;
 };
