@@ -33,7 +33,7 @@ void Robot::RobotInit()
 
 void Robot::Autonomous() 
 {
-  double Speed = 0.3;
+  double Speed = 0.5;
 
   bool direction = true; //True starts on the left, false on the right
 
@@ -43,7 +43,7 @@ void Robot::Autonomous()
   double stageFour = 3.1;
   double stageFive = 4;
   double stageSix = 4.1;
-  double stageSeven = 8.5;
+  double stageSeven = 5.5;
 
   double turnAngle = 180;
   Navx.ZeroYaw();
@@ -123,19 +123,20 @@ void Robot::Autonomous()
       //Turn 180 degrees
       seconds.Stop();
       frc::SmartDashboard::PutNumber("Angle", Navx.GetYaw());
-      if (Navx.GetYaw() >= 0 && Navx.GetYaw() < turnAngle)
+      if (Navx.GetYaw() >= -15 && Navx.GetYaw() < turnAngle)
       {
         MecanumInput.XValue = 0;
         MecanumInput.YValue = 0;
-        MecanumInput.ZValue = ((turnAngle - Navx.GetYaw()) * Speed * (1/turnAngle) - Speed / 2 + 0.24) * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.ZValue = ((turnAngle - Navx.GetYaw()) * Speed * (1/turnAngle) - Speed / 2 + 0.5) * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
       }
       else
       {
+        seconds.Start();
         MecanumInput.XValue = 0;
         MecanumInput.YValue = 0;
         MecanumInput.ZValue = 0;
       }
-      seconds.Start();
+
     }
     
     else if (seconds.Get() <= stageSeven)
@@ -155,7 +156,6 @@ void Robot::Autonomous()
       MecanumInput.ZValue = 0;
     }
     MecanumDrive.Run();
-
     frc::Wait(0.015);
 
   }
