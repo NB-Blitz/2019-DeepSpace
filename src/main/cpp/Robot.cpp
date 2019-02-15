@@ -1,15 +1,16 @@
 #include "Robot.h"
 
 Robot::Robot() :
-  LeftFrontMotor(1),
-  LeftBackMotor(2),
-  RightFrontMotor(3),
-  RightBackMotor(4),
+  LeftFrontMotor(0),
+  LeftBackMotor(1),
+  RightFrontMotor(2),
+  RightBackMotor(3),
   Motors(&LeftFrontMotor, &LeftBackMotor, &RightFrontMotor, &RightBackMotor),
   Logger(0),
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
-  Xbox(0)
+  Xbox(0),
+  Navx(SPI::Port::kMXP)
 {
 
 }
@@ -32,13 +33,18 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
+  Navx.Reset();
   while (IsOperatorControl() && IsEnabled()) 
   {
     Xbox.update();
 
-    double XInput = -Xbox.RightX;
-    double YInput = Xbox.RightY;
-    double ZInput = -Xbox.LeftX;
+    double XInput = Xbox.RightX;
+    double YInput = -Xbox.RightY;
+    double ZInput = Xbox.LeftX;
+
+    FieldControl(XInput, YInput);
+    XInput = newX;
+    YInput = newY;
 
     if(fabs(XInput) < .1)
     {
@@ -92,6 +98,38 @@ void Robot::OperatorControl()
     frc::Wait(0.005);
   }
 }
+  //Field Oriented Control
+
+  void Robot::FieldControl(double x, double y)
+  {
+    float pi = 3.1415926; 
+    double angle = 0;
+    double angleR = ((Navx.GetYaw() + 180) * pi) / 180.0;
+    double angleJ = atan2(y, x) + pi;
+    double m = sqrt(pow(x,2) + pow(y,2)); //Delcaring r (magnitude); 
+    frc::SmartDashboard::PutNumber("Angle",angleR);
+
+    //For Quadrant 4
+    if(angleJ > 90 && angleJ < 270)
+    {
+      angle = pi + angleJ;
+    }
+    else if(angleJ > 270)
+    {
+      angle = (2 *pi) + angleJ;
+    }
+
+    else
+    {
+      angle = angleJ;
+    }
+    
+    angle += angleR;
+
+    newX = m * cos(angle);
+    newY = m * sin(angle);
+  }
+
 
 void Robot::Test() 
 {
