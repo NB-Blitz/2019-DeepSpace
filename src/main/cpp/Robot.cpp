@@ -46,9 +46,9 @@ void Robot::OperatorControl()
 	//Robot.setWorking(true);
 	//bool workNormally = true;
 
-    double XInput = -Xbox.RightX;
-    double YInput = Xbox.RightY;
-    double ZInput = -Xbox.LeftX;
+    double XInput = Xbox.RightX;
+    double YInput = -Xbox.RightY;
+    double ZInput = Xbox.LeftX;
 
     if (Xbox.RightStickButton)
     {
@@ -56,7 +56,7 @@ void Robot::OperatorControl()
       YInput = LineTracker.GetDirections()[1];
       ZInput = LineTracker.GetDirections()[2];
     }
-    if (Ultrasonics.willCrash() && YInput < 0)
+    if (Ultrasonics.willCrash() && YInput > 0)
     {
       YInput = 0;
     }
