@@ -27,7 +27,6 @@ void Robot::Autonomous()
 void Robot::OperatorControl() 
 {
   areLimits = Blitz_Joy.getButton(10, Shoulder_Axis);
-  //Manip.initializePID(true); //PID is initialized
   if (!areLimits) //It is assumed that the robot is set in the home position (both axes are at about 90 degrees)
   {
     homeEncoderValueShoulder = 0;
@@ -40,7 +39,6 @@ void Robot::OperatorControl()
   }
   while (IsOperatorControl() && IsEnabled()) 
   {
-    
     if (areLimits) //Code for presence of limit switches
     {
       if (initialReset)
@@ -181,13 +179,158 @@ void Robot::OperatorControl()
   frc::Wait(0.005);
   }
 }
-
-void Robot::Test() 
+/*
+  XBox Controller Button Map
+  ==========================
+  Start Button -> Toggle between ball and disc mode
+  Back Button -> Toggle between manual and automatic default
+  Y Button -> High Position on ship
+  B Button -> Medium Position on ship
+  A Button -> Low Position on ship
+  X Button -> Habitat Position
+  Left Bumper -> Grab from ground
+  Right Bumper -> Grab from player station
+  Left Axis -> If manual enabled, move shoulder
+  Right Axis -> If manual enabled, move elbow
+*/
+void Robot::Test() //This is test code using the xBox Controller (for some reason, it won't run on Test mode, but the toggles work correctly when put in OperatorControl())
 {
+  bool ballToggle = true; //if true, then balls - if false, then discs
+  bool manualToggle = false; //if true, then manual is allowed - if false, then manual is disabled
+  bool isStartDown = false;
+  bool isBackDown = false;
+  double leftYAxis;
+  double rightYAxis;
+  if (!areLimits) //It is assumed that the robot is set in the home position (both axes are at about 90 degrees)
+  {
+    homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
+    homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
+    frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
+    frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
+  }
   while(IsTest() && IsEnabled())
   {
-    frc::Wait(0.005);
+    //Toggle between Ball and Disc
+    if (Blitz_Joy.getXBoxButton(XBox_Start_Button) && !isStartDown)
+    {
+      ballToggle = !ballToggle;
+    }
+    isStartDown = Blitz_Joy.getXBoxButton(XBox_Start_Button);
+
+    //Toggle between allowed manual and disabled manual (fully automatic)
+    if (Blitz_Joy.getXBoxButton(XBox_Back_Button) && !isBackDown)
+    { 
+      manualToggle = !manualToggle;
+    }
+    isBackDown = Blitz_Joy.getXBoxButton(XBox_Back_Button);
+
+    //Hard-coded positions
+    if (Blitz_Joy.getXBoxButton(XBox_Y_Button))
+    {
+      if (ballToggle)
+      {
+        //Go to ball high position on ship
+      }
+      else
+      {
+        //Go to disc high position on ship
+      }
+      
+    }
+    else if (Blitz_Joy.getXBoxButton(XBox_B_Button))
+    {
+      if (ballToggle)
+      {
+        //Go to ball medium position on ship
+      }
+      else
+      {
+        //Go to disc medium position on ship
+      }
+    } 
+    else if (Blitz_Joy.getXBoxButton(XBox_A_Button))
+    {
+      if (ballToggle)
+      {
+        //Go to ball low position on ship
+      }
+      else
+      {
+        //Go to disc low position on ship
+      }
+    } 
+    else if (Blitz_Joy.getXBoxButton(XBox_X_Button))
+    {
+      if (ballToggle)
+      {
+        //Go to ball habitat position
+      }
+      else
+      {
+        //Go to disc habitat position
+      }
+    }
+    else if (Blitz_Joy.getXBoxButton(XBox_Left_Bumper))
+    {
+      if (ballToggle)
+      {
+        //Grab ball from the ground
+      }
+      else
+      {
+        //Grab disc from the ground
+      }
+    } 
+    else if (Blitz_Joy.getXBoxButton(XBox_Right_Bumper))
+    {
+      if (ballToggle)
+      {
+        //Grab ball from the player station
+      }
+      else
+      {
+        //Grab disc from the player station
+      }
+    }
+    //Manual Code // Default Position
+    else
+    {
+      if (manualToggle)
+      {
+        leftYAxis = Blitz_Joy.getXBoxAxis(XBox_Left_Y_Axis);
+        rightYAxis = Blitz_Joy.getXBoxAxis(XBox_Right_Y_Axis);
+        
+        //Manual Shoulder Code
+        if (abs(leftYAxis) > 0.1)
+        {
+          Manip.manipSet(leftYAxis * 0.4, Shoulder_Axis, areLimits, homeEncoderValueShoulder);
+        }
+        else
+        {
+          Manip.manipSet(Off, Shoulder_Axis);
+        }
+        
+        //Manual Elbow Code
+        if (abs(rightYAxis) > 0.1)
+        {
+          Manip.manipSet(rightYAxis * 0.4, Elbow_Axis, areLimits, homeEncoderValueElbow);
+        }
+        else
+        {
+          Manip.manipSet(Off, Elbow_Axis);
+        }
+
+      }
+      else
+      {
+        //Go to default position
+      }
+    }
+  frc::SmartDashboard::PutBoolean("Manual Enabled", manualToggle);
+  frc::SmartDashboard::PutBoolean("Ball Mode", ballToggle);
+  frc::SmartDashboard::PutBoolean("Disc Mode", !ballToggle);
   }
+
 }
 
 #ifndef RUNNING_FRC_TESTS

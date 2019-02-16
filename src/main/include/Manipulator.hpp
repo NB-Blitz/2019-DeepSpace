@@ -51,26 +51,6 @@ namespace frc
                 Setting motors to move to a degree lower than DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO constant will cause unexpected behavior 
            */
 
-            //PID Coefficients for Main
-            double PID_P_SHOULDER = 0.5;
-            double PID_I_SHOULDER = 0; 
-            double PID_D_SHOULDER = 0;
-            double PID_F_SHOULDER = 0;
-
-            //PID Coefficients for Secondary
-            double PID_P_ELBOW = 0.25;
-            double PID_I_ELBOW = 0; 
-            double PID_D_ELBOW = 0;
-            double PID_F_ELBOW = 0;
-
-            /*
-            //PID Coefficients for Wrist
-            double PID_P_WRIST = 0.25;
-            double PID_I_WRIST = 0; 
-            double PID_D_WRIST = 0;
-            double PID_F_WRIST = 0;
-            */
-           
             //Dimensions of robot (for isPossible frc rules)
             /*
             
@@ -91,11 +71,6 @@ namespace frc
             double getDegrees(int axisID, double rawHome = 0); //0 is Main, 1 is Secondary...
             void resetDegrees(int axisID); //See above
             bool resetToEncoder(int axisID); //bool returns if the motor and its encoder is reset
-            void initializePID(bool firstTime);
-            double getP(int axisID);
-            double getI(int axisID);
-            double getD(int axisID);
-            double getF(int axisID);
             double getAngleForCoordinates(double x, double y, int axisID); //used by next method
             void moveToCoordinates(double x, double y, bool areLimits = true, double rawHomeShoulder = 0, double rawHomeElbow = 0); //In inches
             bool isPossible(double x, double y);
