@@ -15,7 +15,6 @@ class Robot : public frc::SampleRobot
         void Autonomous() override;
         void OperatorControl() override;
         void Test() override;
-        void FieldControl(double x, double y);
 
     private:
         TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
@@ -26,8 +25,5 @@ class Robot : public frc::SampleRobot
         Blitz::Models::MecanumInput MecanumInput;
         Blitz::Mecanum MecanumDrive;
         Blitz::Joysticks::XboxController Xbox;
-
-       //for field oriented control 
-        double newX = 0;
-        double newY = 0;
+        Blitz::FieldOrientedControl FieldControl;
 };

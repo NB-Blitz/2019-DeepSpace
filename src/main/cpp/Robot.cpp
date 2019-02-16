@@ -38,13 +38,13 @@ void Robot::OperatorControl()
   {
     Xbox.update();
 
-    double XInput = Xbox.RightX;
-    double YInput = -Xbox.RightY;
-    double ZInput = Xbox.LeftX;
+    double XInput = -Xbox.RightX;
+    double YInput = Xbox.RightY;
+    double ZInput = -Xbox.LeftX;
 
-    FieldControl(XInput, YInput);
-    XInput = newX;
-    YInput = newY;
+    Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
+    XInput = FieldStuff.XValue;
+    YInput = FieldStuff.YValue;
 
     if(fabs(XInput) < .1)
     {
@@ -98,37 +98,6 @@ void Robot::OperatorControl()
     frc::Wait(0.005);
   }
 }
-  //Field Oriented Control
-
-  void Robot::FieldControl(double x, double y)
-  {
-    float pi = 3.1415926; 
-    double angle = 0;
-    double angleR = ((Navx.GetYaw() + 180) * pi) / 180.0;
-    double angleJ = atan2(y, x) + pi;
-    double m = sqrt(pow(x,2) + pow(y,2)); //Delcaring r (magnitude); 
-    frc::SmartDashboard::PutNumber("Angle",angleR);
-
-    //For Quadrant 4
-    if(angleJ > 90 && angleJ < 270)
-    {
-      angle = pi + angleJ;
-    }
-    else if(angleJ > 270)
-    {
-      angle = (2 *pi) + angleJ;
-    }
-
-    else
-    {
-      angle = angleJ;
-    }
-    
-    angle += angleR;
-
-    newX = m * cos(angle);
-    newY = m * sin(angle);
-  }
 
 
 void Robot::Test() 
