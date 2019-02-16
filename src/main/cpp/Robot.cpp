@@ -9,7 +9,9 @@ Robot::Robot() :
   Logger(0),
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
-  Xbox(0)
+  Xbox(0),
+  LineTracker(),
+  Ultrasonics(0, 1)
 {
 
 }
@@ -40,10 +42,24 @@ void Robot::OperatorControl()
   while (IsOperatorControl() && IsEnabled()) 
   {
     Xbox.update();
+    LineTracker.Update();
+	//Robot.setWorking(true);
+	//bool workNormally = true;
 
-    double XInput = -Xbox.RightX;
-    double YInput = Xbox.RightY;
-    double ZInput = -Xbox.LeftX;
+    double XInput = Xbox.RightX;
+    double YInput = -Xbox.RightY;
+    double ZInput = Xbox.LeftX;
+
+    if (Xbox.RightStickButton)
+    {
+      XInput = LineTracker.GetDirections()[0];
+      YInput = LineTracker.GetDirections()[1];
+      ZInput = LineTracker.GetDirections()[2];
+    }
+    if (Ultrasonics.willCrash() && YInput > 0)
+    {
+      YInput = 0;
+    }
 
     if(fabs(XInput) < .1)
     {
