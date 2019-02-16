@@ -11,7 +11,7 @@ Robot::Robot() :
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
   LineTracker(),
-  Ultrasonics(0, 1)
+  Ultrasonics(0, 1),
   AutoManager()
 {
 
@@ -49,8 +49,7 @@ void Robot::OperatorControl()
   {
     Xbox.update();
     LineTracker.Update();
-	//Robot.setWorking(true);
-	//bool workNormally = true;
+	
 
     double XInput = -Xbox.LeftX;
     double YInput = Xbox.LeftY;
@@ -174,4 +173,6 @@ void Robot::Test()
 
 #ifndef RUNNING_FRC_TESTS
 START_ROBOT_CLASS(Robot)
+//Robot.setWorking(true);
+//bool workNormally = true;
 #endif
