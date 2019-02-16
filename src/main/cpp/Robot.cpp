@@ -11,7 +11,7 @@ Robot::Robot() :
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
   LineTracker(),
-  Ultrasonics(0, 1)
+  Ultrasonics(0, 1),
   AutoManager()
 {
 
