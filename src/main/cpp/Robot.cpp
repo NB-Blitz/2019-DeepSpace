@@ -33,12 +33,12 @@ void Robot::RobotInit()
 
 void Robot::Autonomous() 
 {
-  double Speed = 0.5;
+  double Speed = 0.3;
 
   bool direction = true; //True starts on the left, false on the right
 
-  double stageOne = 1.5;
-  double stageTwo = 2.25;
+  double stageOne = 1;
+  double stageTwo = 2.75;
   double stageThree = 3;
   double stageFour = 3.1;
   double stageFive = 4;
