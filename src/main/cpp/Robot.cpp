@@ -34,17 +34,16 @@ void Robot::RobotInit()
 void Robot::Autonomous() 
 {
   double Speed = 0.3;
-  double SidewaysSpeed = 0.5;
 
   bool direction = true; //True starts on the left, false on the right
 
-  double stageOne = 1.0;
+  double stageOne = 1;
   double stageTwo = 2.6;
   double stageThree = 2.6;
   double stageFour = 2.7;
-  double stageFive = 5.5;
-  double stageSix = 5.6;
-  double stageSeven = 9.5;
+  double stageFive = 5;
+  double stageSix = 5.1;
+  double stageSeven = 6.5;
 
   double turnAngle = 180;
   Navx.ZeroYaw();
@@ -71,7 +70,7 @@ void Robot::Autonomous()
         MecanumInput.YValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
         MecanumInput.ZValue = 0;
       }
-
+      
       else
       {
         //Diagonal left
@@ -101,10 +100,10 @@ void Robot::Autonomous()
 
     else if (seconds.Get() <= stageFive)
     {
-      if (direction)
+      if (direction == true)
       {
         //Go straight right
-        MecanumInput.XValue = -SidewaysSpeed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.XValue = -Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
         MecanumInput.YValue = 0;
         MecanumInput.ZValue = 0;
       }
@@ -112,7 +111,7 @@ void Robot::Autonomous()
       else
       {
         //Go straight left
-        MecanumInput.XValue = SidewaysSpeed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.XValue = Speed * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
         MecanumInput.YValue = 0;
         MecanumInput.ZValue = 0;
       }
@@ -128,7 +127,7 @@ void Robot::Autonomous()
       {
         MecanumInput.XValue = 0;
         MecanumInput.YValue = 0;
-        MecanumInput.ZValue = ((turnAngle - Navx.GetYaw()) * Speed * (1/turnAngle) - Speed / 2 + 0.3) * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
+        MecanumInput.ZValue = ((turnAngle - Navx.GetYaw()) * Speed * (1/turnAngle) - Speed / 2 + 0.5) * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
       }
       else
       {
