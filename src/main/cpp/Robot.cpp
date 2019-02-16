@@ -11,7 +11,8 @@ Robot::Robot() :
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
   LineTracker(),
-  Ultrasonics(0, 1)
+  Ultrasonics(0, 1),
+  AutoManager()
 {
 
 }
@@ -34,7 +35,12 @@ void Robot::RobotInit()
 
 void Robot::Autonomous() 
 {
-  
+  while(IsAutonomous() && IsEnabled())
+  {
+    AutoManager.DriveToBall(&MecanumInput);
+
+    MecanumDrive.Run();
+  }
 }
 
 void Robot::OperatorControl() 
@@ -43,12 +49,11 @@ void Robot::OperatorControl()
   {
     Xbox.update();
     LineTracker.Update();
-	//Robot.setWorking(true);
-	//bool workNormally = true;
+	
 
-    double XInput = Xbox.RightX;
-    double YInput = -Xbox.RightY;
-    double ZInput = Xbox.LeftX;
+    double XInput = -Xbox.LeftX;
+    double YInput = Xbox.LeftY;
+    double ZInput = -Xbox.RightX;
 
     if (Xbox.RightStickButton)
     {
@@ -96,6 +101,11 @@ void Robot::OperatorControl()
     else if(Xbox.RightTrigger > .2)
     {
       MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.LeftTrigger;
+    }
+
+    if(Xbox.AButton)
+    {
+      AutoManager.DriveToBall(&MecanumInput);
     }
     
     MecanumDrive.Run();
@@ -163,4 +173,6 @@ void Robot::Test()
 
 #ifndef RUNNING_FRC_TESTS
 START_ROBOT_CLASS(Robot)
+//Robot.setWorking(true);
+//bool workNormally = true;
 #endif

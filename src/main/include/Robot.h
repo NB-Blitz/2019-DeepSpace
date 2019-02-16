@@ -3,7 +3,9 @@
 #include <frc/WPILib.h>
 #include <BlitzLib/BlitzLib.hpp>
 #include <ctre/Phoenix.h>
+#include <Math.h>
 
+#include "Autonomous.hpp"
 
 class Robot : public frc::SampleRobot 
 {
@@ -25,4 +27,5 @@ class Robot : public frc::SampleRobot
         Blitz::Joysticks::XboxController Xbox;
         Blitz::LineTrack LineTracker;
         Blitz::Ultrasonic Ultrasonics;
+        Blitz::Autonomous AutoManager;
 };
