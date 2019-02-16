@@ -1,8 +1,10 @@
 /*
-  2/16/2019 10:00 A.M.
-  -Both limit and non-Limit code is functional
-  -Encoder constants are pretty good, but may be slightly tuned
-  -Hold Button 10 on the Joystick controlling the Shoulder as you enable in teleop to initiate limit code. If you do not, the non-limit code will run
+  2/16/2019 4:20 P.M.
+  
+  TO-DO:
+  -Work toward removing Limit Switches from code completely and replace with Potentiometers
+  -In Robot.cpp, remove areLimits = true code
+  -Add remaining potentiometers to code and find coefficients
 */
 
 #include "Robot.h"
@@ -27,18 +29,39 @@ void Robot::Autonomous()
 void Robot::OperatorControl() 
 {
   areLimits = Blitz_Joy.getButton(10, Shoulder_Axis);
+  double rawWrist;
+  double wristMin = 1024, wristMax = 0;
   if (!areLimits) //It is assumed that the robot is set in the home position (both axes are at about 90 degrees)
   {
     homeEncoderValueShoulder = 0;
     homeEncoderValueElbow = 0;
-    //Only necessary if the encoder's zero is not where the rest position is
-    homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
-    homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
+    //homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
+    //homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
+    homeEncoderValueWrist = Manip.getRawUnits(Wrist_Axis);
     frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
     frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
+    frc::SmartDashboard::PutNumber("Home Encoder - Wrist", homeEncoderValueWrist);
+    
   }
   while (IsOperatorControl() && IsEnabled()) 
   {
+    Manip.manipSet(0.4 * Blitz_Joy.getAxis(Y_Axis, Shoulder_Axis), Wrist_Axis);
+    frc::SmartDashboard::PutNumber("Y-Axis", Blitz_Joy.getAxis(Y_Axis, Shoulder_Axis));
+    rawWrist = Manip.getRawUnits(Wrist_Axis);
+    if (rawWrist > wristMax)
+    {
+      wristMax = rawWrist;
+    }
+    else if (rawWrist < wristMin)
+    {
+      wristMin = rawWrist;
+    }
+
+    frc::SmartDashboard::PutNumber("Wrist Pot Raw", rawWrist);
+    frc::SmartDashboard::PutNumber("Wrist Pot Raw Max", wristMax);
+    frc::SmartDashboard::PutNumber("Wrist Pot Raw Min", wristMin);
+    frc::SmartDashboard::PutNumber("Wrist Pot Degrees", Manip.getDegrees(Wrist_Axis, homeEncoderValueWrist));
+    /*
     if (areLimits) //Code for presence of limit switches
     {
       if (initialReset)
@@ -117,6 +140,7 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
     frc::SmartDashboard::PutNumber("Elbow Motor Degrees (If Limits existed)", Manip.getDegrees(Elbow_Axis));
     }
+    
     else //Code for lack of limit switches
     {
       yAxisShoulder = Blitz_Joy.getAxis(Y_Axis, Shoulder_Joystick); 
@@ -141,8 +165,9 @@ void Robot::OperatorControl()
         {
           Manip.manipSetToDegrees(180, Shoulder_Axis, false, homeEncoderValueShoulder);
         }
-        else
+        else 
         {
+          
           if (yAxisShoulder > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisShoulder < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
           {
             Manip.manipSet(yAxisShoulder, Shoulder_Axis, false, homeEncoderValueShoulder);
@@ -150,7 +175,7 @@ void Robot::OperatorControl()
           else
           {
             Manip.manipSet(Off, Shoulder_Axis, false, homeEncoderValueShoulder);
-          }
+          }          
         }
 
         //Elbow Axis
@@ -158,7 +183,7 @@ void Robot::OperatorControl()
         {
           Manip.manipSetToDegrees(180, Elbow_Axis, false, homeEncoderValueElbow);
         }
-        else
+        else 
         {
           if (yAxisElbow > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisElbow < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
           {
@@ -176,6 +201,7 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
     }
   frc::SmartDashboard::PutBoolean("AreLimits?", areLimits);
+  */
   frc::Wait(0.005);
   }
 }

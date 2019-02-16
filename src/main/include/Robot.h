@@ -25,7 +25,7 @@ class Robot : public frc::SampleRobot
         bool initialReset = false;
 
         //if the previous variable is false, these variables are relevant
-        double homeEncoderValueShoulder, homeEncoderValueElbow;
+        double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
         double yAxisShoulder, yAxisElbow;
         frc::Manipulator Manip;
         frc::Blitz_Joystick Blitz_Joy;

@@ -36,14 +36,11 @@ namespace frc
             const double TO_DEGREES_ELBOW = ENCODER_COUNTS_PER_ROTATION_ELBOW / 360;
             const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW = 90; //True Zero = faces previous axis
 
-            /*
             //For Wrist Axis
-            const double TO_DEGREES_WRIST = 12;
-            const double MAX_RANGE_WRIST = 300;
-            const double LENGTH_WRIST = 5; //In inches
-            const double ENCODER_COUNTS_PER_ROTATION_WRIST = 3649;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST = 30; //True Zero = faces previous axis
-            */
+            const double MAX_RANGE_WRIST = 260;
+            const double COUNTS_PER_QUARTER = 80; //for 90 degrees, this is how many counts I get
+            const double TO_DEGREES_WRIST = COUNTS_PER_QUARTER / 90;
+            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST = 80; //True Zero = faces previous axis
 
 
            /*
@@ -56,12 +53,9 @@ namespace frc
             
             */
 
-            TalonSRX Shoulder_Motor, Elbow_Motor;// Wrist_Motor;
-            DigitalInput Shoulder_Motor_Limit_Switch, Elbow_Motor_Limit_Switch;//, Wrist_Motor_Limit_Switch; 
-            //AnalogPotentiometer Shoulder_Pot, Elbow_Pot, Wrist_Pot;
-            //const double SHOULDER_POT_OFFSET = 0;
-            //const double ELBOW_POT_OFFSET = 0;
-            //const double WRIST_POT_OFFSET = 0;
+            TalonSRX Shoulder_Motor, Elbow_Motor, Wrist_Motor;
+            DigitalInput Shoulder_Motor_Limit_Switch, Elbow_Motor_Limit_Switch;
+
         public:
             Manipulator();
             void manipSet(double speed, int axisID, bool areLimits = true, double rawHome = 0); //PercentageOutput (No PID)
@@ -74,8 +68,8 @@ namespace frc
             double getAngleForCoordinates(double x, double y, int axisID); //used by next method
             void moveToCoordinates(double x, double y, bool areLimits = true, double rawHomeShoulder = 0, double rawHomeElbow = 0); //In inches
             bool isPossible(double x, double y);
-            //double getAngleForParallel(double x, double y); 
-            //void moveToParallel(double x, double y);
+            double getAngleForParallel(double x, double y); 
+            void moveToParallel(double x, double y, bool areLimits = false, double rawHomeWrist = 0);
 
     };
 }
