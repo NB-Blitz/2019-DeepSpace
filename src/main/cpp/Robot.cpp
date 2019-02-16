@@ -1,15 +1,17 @@
 #include "Robot.h"
 
 Robot::Robot() :
-  LeftFrontMotor(1),
-  LeftBackMotor(2),
-  RightFrontMotor(3),
-  RightBackMotor(4),
+  LeftFrontMotor(0),
+  LeftBackMotor(1),
+  RightFrontMotor(2),
+  RightBackMotor(3),
   Motors(&LeftFrontMotor, &LeftBackMotor, &RightFrontMotor, &RightBackMotor),
   Logger(0),
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
+  LineTracker(),
+  Ultrasonics(0, 1)
   AutoManager()
 {
 
@@ -18,6 +20,11 @@ Robot::Robot() :
 void Robot::RobotInit() 
 {
   MecanumDrive.Initialize(&MecanumInput);
+  MecanumDrive.SetMotorDirection(0, -1);
+  MecanumDrive.SetMotorDirection(1, -1);
+  MecanumDrive.SetMotorDirection(2, -1);
+  MecanumDrive.SetMotorDirection(3, -1);
+
 
   frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
   frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
@@ -41,10 +48,24 @@ void Robot::OperatorControl()
   while (IsOperatorControl() && IsEnabled()) 
   {
     Xbox.update();
+    LineTracker.Update();
+	//Robot.setWorking(true);
+	//bool workNormally = true;
 
     double XInput = -Xbox.LeftX;
     double YInput = Xbox.LeftY;
     double ZInput = -Xbox.RightX;
+
+    if (Xbox.RightStickButton)
+    {
+      XInput = LineTracker.GetDirections()[0];
+      YInput = LineTracker.GetDirections()[1];
+      ZInput = LineTracker.GetDirections()[2];
+    }
+    if (Ultrasonics.willCrash() && YInput > 0)
+    {
+      YInput = 0;
+    }
 
     if(fabs(XInput) < .1)
     {
