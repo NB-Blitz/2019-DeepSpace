@@ -210,10 +210,10 @@ void Blitz::Mecanum::Run()
             }
         }
 
-        Motors->Motor1->Set(ControlMode::PercentOutput, motorValues[0]);
-        Motors->Motor2->Set(ControlMode::PercentOutput, motorValues[1]);
-        Motors->Motor3->Set(ControlMode::PercentOutput, motorValues[2]);
-        Motors->Motor4->Set(ControlMode::PercentOutput, motorValues[3]);
+        Motors->Motor1->Set(ControlMode::PercentOutput, MotorDirs[0] * motorValues[0]);
+        Motors->Motor2->Set(ControlMode::PercentOutput, MotorDirs[1] * motorValues[1]);
+        Motors->Motor3->Set(ControlMode::PercentOutput, MotorDirs[2] * motorValues[2]);
+        Motors->Motor4->Set(ControlMode::PercentOutput, MotorDirs[3] * motorValues[3]);
     }
 }
 
