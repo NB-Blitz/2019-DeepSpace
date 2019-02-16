@@ -25,14 +25,14 @@ namespace frc
             //For Main Axis
             const double MAX_RANGE_SHOULDER = 270;
             const double LENGTH_SHOULDER = 9.5; //in inches
-            const double ENCODER_COUNTS_PER_ROTATION_SHOULDER = 7800;
+            const double ENCODER_COUNTS_PER_ROTATION_SHOULDER = 7500;
             const double TO_DEGREES_SHOULDER = ENCODER_COUNTS_PER_ROTATION_SHOULDER / 360;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER = 80; //True Zero = faces parallel to ground and faces forward
+            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER = 90; //True Zero = faces parallel to ground and faces forward
 
             //For Secondary Axis
             const double MAX_RANGE_ELBOW = 270;
             const double LENGTH_ELBOW = 4.5; //In inches
-            const double ENCODER_COUNTS_PER_ROTATION_ELBOW = 9000;
+            const double ENCODER_COUNTS_PER_ROTATION_ELBOW = 8200;
             const double TO_DEGREES_ELBOW = ENCODER_COUNTS_PER_ROTATION_ELBOW / 360;
             const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW = 90; //True Zero = faces previous axis
 

@@ -77,7 +77,7 @@ void frc::Manipulator::manipSet(double speed, int axisID, bool areLimits, double
         if (axisID == Shoulder_Axis)
         {
             bool cancel1 = ((getDegrees(Shoulder_Axis, rawHome) >= MAX_RANGE_SHOULDER) && speed > 0);
-            bool cancel2 = (getRawUnits(Shoulder_Axis) > rawHome && speed < 0);
+            bool cancel2 = ((getDegrees(Shoulder_Axis, rawHome)) <= DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER && speed < 0);
             if (!(cancel1 || cancel2))
             {
                 Shoulder_Motor.Set(ControlMode::PercentOutput, speed); 
@@ -92,7 +92,7 @@ void frc::Manipulator::manipSet(double speed, int axisID, bool areLimits, double
         else if (axisID == Elbow_Axis)
         {
             bool cancel1 = ((getDegrees(Elbow_Axis, rawHome) >= MAX_RANGE_ELBOW) && speed > 0);
-            bool cancel2 = (getRawUnits(Elbow_Axis) < rawHome && speed < 0);
+            bool cancel2 = ((getDegrees(Elbow_Axis, rawHome)) <= DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW && speed < 0);
             if (!(cancel1 || cancel2))
             {
                 Elbow_Motor.Set(ControlMode::PercentOutput, speed); 
@@ -252,13 +252,13 @@ double frc::Manipulator::getDegrees(int axisID, double rawHome) //Returns degree
 {
     if (axisID == Shoulder_Axis)
     {
-        double degrees = (rawHome + getRawUnits(Shoulder_Axis)) / TO_DEGREES_SHOULDER;
+        double degrees = (getRawUnits(Shoulder_Axis) - rawHome) / TO_DEGREES_SHOULDER;
         return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER + degrees, 360));   
     }
     else if (axisID == Elbow_Axis) //Needs changing
     {
-        double degrees = (rawHome + getRawUnits(Elbow_Axis)) / TO_DEGREES_ELBOW;
-        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW - degrees, 360));   
+        double degrees = (rawHome - getRawUnits(Elbow_Axis)) / TO_DEGREES_ELBOW;
+        return abs(fmod(DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW + degrees, 360));   
     }
     /*
     else if (axisID == Wrist_Axis)

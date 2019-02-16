@@ -1,3 +1,10 @@
+/*
+  2/16/2019 10:00 A.M.
+  -Both limit and non-Limit code is functional
+  -Encoder constants are pretty good, but may be slightly tuned
+  -Hold Button 10 on the Joystick controlling the Shoulder as you enable in teleop to initiate limit code. If you do not, the non-limit code will run
+*/
+
 #include "Robot.h"
 
 Robot::Robot() :
@@ -19,6 +26,7 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
+  areLimits = Blitz_Joy.getButton(10, Shoulder_Axis);
   //Manip.initializePID(true); //PID is initialized
   if (!areLimits) //It is assumed that the robot is set in the home position (both axes are at about 90 degrees)
   {
@@ -165,12 +173,11 @@ void Robot::OperatorControl()
         }
       }
     frc::SmartDashboard::PutNumber("Shoulder Motor Degrees", Manip.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
-    frc::SmartDashboard::PutNumber("Shoulder Motor Degrees (If Limits existed)", Manip.getDegrees(Shoulder_Axis));
     frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
     frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
-    frc::SmartDashboard::PutNumber("Elbow Motor Degrees (If Limits existed)", Manip.getDegrees(Elbow_Axis));
     frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
     }
+  frc::SmartDashboard::PutBoolean("AreLimits?", areLimits);
   frc::Wait(0.005);
   }
 }

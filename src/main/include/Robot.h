@@ -19,7 +19,7 @@ class Robot : public frc::SampleRobot
     private:
 
         //Test Variable -> true for limit switches, false for pre-set known
-        bool areLimits = true;
+        bool areLimits = false;
 
         //if the previous variable is true, these variables are relevant
         bool initialReset = false;
