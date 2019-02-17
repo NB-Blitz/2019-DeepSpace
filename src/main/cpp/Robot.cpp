@@ -12,7 +12,8 @@ Robot::Robot() :
   Xbox(0),
   LineTracker(),
   Ultrasonics(0, 1),
-  AutoManager()
+  AutoManager(),
+  Climber()
 {
 
 }
@@ -45,6 +46,8 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
+  Climber.StartCompressor();
+  
   while (IsOperatorControl() && IsEnabled()) 
   {
     Xbox.update();
@@ -100,13 +103,17 @@ void Robot::OperatorControl()
     }
     else if(Xbox.RightTrigger > .2)
     {
-      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.LeftTrigger;
+      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.RightTrigger;
     }
 
     if(Xbox.AButton)
     {
       AutoManager.DriveToBall(&MecanumInput);
     }
+
+    Climber.SetFrontSolenoid(Xbox.LeftBumper);
+    Climber.SetBackSolenoid(Xbox.RightBumper);
+
     
     MecanumDrive.Run();
 

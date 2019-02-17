@@ -6,6 +6,7 @@
 #include <Math.h>
 
 #include "Autonomous.hpp"
+#include "Climber.hpp"
 
 class Robot : public frc::SampleRobot 
 {
@@ -28,4 +29,5 @@ class Robot : public frc::SampleRobot
         Blitz::LineTrack LineTracker;
         Blitz::Ultrasonic Ultrasonics;
         Blitz::Autonomous AutoManager;
+        Blitz::Climber Climber;
 };
