@@ -16,14 +16,14 @@ namespace Blitz
                 Joystick Xbox;
 
                 //Buttons
-                double AButton = 0;
-                double BButton = 0;
-                double XButton = 0;
-                double YButton = 0;
-                double LeftBumper = 0;
-                double RightBumper = 0;
-                double LeftStickButton = 0;
-                double RightStickButton = 0;
+                bool AButton = 0;
+                bool BButton = 0;
+                bool XButton = 0;
+                bool YButton = 0;
+                bool LeftBumper = 0;
+                bool RightBumper = 0;
+                bool LeftStickButton = 0;
+                bool RightStickButton = 0;
 
                 //axis
                 double LeftX = 0;
@@ -34,22 +34,22 @@ namespace Blitz
                 double RightTrigger = 0;
 
                 //Button ids
-                const int A_BUTTON_ID = 0;
-                const int B_BUTTON_ID = 0;
-                const int X_BUTTON_ID = 0;
-                const int Y_BUTTON_ID = 0;
-                const int LEFT_BUMPER_ID = 0;
-                const int RIGHT_BUMPER_ID = 0;
-                const int LEFT_STICK_BUTTON_ID = 0;
-                const int RIGHT_STICK_BUTTON_ID = 0;
+                const int A_BUTTON_ID = 1;
+                const int B_BUTTON_ID = 2;
+                const int X_BUTTON_ID = 3;
+                const int Y_BUTTON_ID = 4;
+                const int LEFT_BUMPER_ID = 5;
+                const int RIGHT_BUMPER_ID = 6;
+                const int LEFT_STICK_BUTTON_ID = 9;
+                const int RIGHT_STICK_BUTTON_ID = 10;
 
                 //axis ids
                 const int LEFT_X_AXIS_ID = 0;
-                const int LEFT_Y_AXIS_ID = 0;
-                const int RIGHT_X_AXIS_ID = 0;
-                const int RIGHT_Y_AXIS_ID = 0;
-                const int LEFT_TRIGGER_ID = 0;
-                const int RIGHT_TRIGGER_ID = 0;
+                const int LEFT_Y_AXIS_ID = 1;
+                const int RIGHT_X_AXIS_ID = 4;
+                const int RIGHT_Y_AXIS_ID = 5;
+                const int LEFT_TRIGGER_ID = 2;
+                const int RIGHT_TRIGGER_ID = 3;
 
                 void update();
 
@@ -76,24 +76,23 @@ namespace Blitz
                 Joystick ThreeAxis;
 
                 //Buttons
-                double Trigger = 0;
-                double Button2 = 0;
-                double Button3 = 0;
-                double Button4 = 0;
-                double Button5 = 0;
-                double Button6 = 0;
-                double Button7 = 0;
-                double Button8 = 0;
-                double Button9 = 0;
-                double Button10 = 0;
-                double Button11 = 0;
-                double Button12= 0;
-                double DPad[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+                bool Trigger = 0;
+                bool Button2 = 0;
+                bool Button3 = 0;
+                bool Button4 = 0;
+                bool Button5 = 0;
+                bool Button6 = 0;
+                bool Button7 = 0;
+                bool Button8 = 0;
+                bool Button9 = 0;
+                bool Button10 = 0;
+                bool Button11 = 0;
+                bool Button12= 0;
 
                 //axis
                 double XAxis = 0;
                 double YAxis = 0;
-                double zAxis = 0;
+                double ZAxis = 0;
                 double Dial = 0;
 
                 //Button IDs
@@ -109,13 +108,12 @@ namespace Blitz
                 const int BUTTON10_ID = 10;
                 const int BUTTON11_ID = 11;
                 const int BUTTON12_ID = 12;
-                const int D_PAD_ID[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
                 //axis IDs
                 const int X_AXIS_ID = 0;
-                const int Y_AXIS_ID = 0;
-                const int Z_AXIS_ID = 0;
-                const int DIAL_ID = 0;
+                const int Y_AXIS_ID = 1;
+                const int Z_AXIS_ID = 2;
+                const int DIAL_ID = 3;
 
                 void update();
 
@@ -139,14 +137,14 @@ namespace Blitz
                 Joystick TwoAxis;
 
                 //Buttons
-                double Trigger = 0;
-                double Button2 = 0;
-                double Button3 = 0;
-                double Button4 = 0;
-                double Button5 = 0;
-                double Button6 = 0;
-                double Button7 = 0;
-                double Button8 = 0;
+                bool Trigger = 0;
+                bool Button2 = 0;
+                bool Button3 = 0;
+                bool Button4 = 0;
+                bool Button5 = 0;
+                bool Button6 = 0;
+                bool Button7 = 0;
+                bool Button8 = 0;
 
                 //Axis
                 double XAxis = 0;

@@ -5,21 +5,33 @@
 #include <ctre/Phoenix.h>
 #include <Manipulator.hpp>
 #include <Blitz_Joystick.hpp>
+#include <Math.h>
 
+#include "Autonomous.hpp"
 
 class Robot : public frc::SampleRobot 
 {
     public:
         Robot();
+
         void RobotInit() override;
         void Autonomous() override;
         void OperatorControl() override;
         void Test() override;
 
     private:
-        //if the previous variable is false, these variables are relevant
-        double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
-        double yAxisShoulder, yAxisElbow;
+        TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
+
+        Blitz::BlitzLogger Logger;
+        Blitz::Models::DriveMotors Motors;
+        Blitz::Models::MecanumInput MecanumInput;
+        Blitz::Mecanum MecanumDrive;
+        Blitz::Joysticks::XboxController Xbox;
+        Blitz::LineTrack LineTracker;
+        Blitz::Ultrasonic Ultrasonics;
+        Blitz::Autonomous AutoManager;
         frc::Manipulator Manip;
         frc::Blitz_Joystick Blitz_Joy;
+        double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
+        double yAxisShoulder, yAxisElbow;
 };

@@ -21,6 +21,13 @@ namespace Blitz
             }
 
             void SetMotorDirection(int Motor, int dir);
+            void TuneF(int MotorID, double FGain);
+            void TuneP(int MotorID, double PGain);
+            void TuneI(int MotorID, double IGain);
+            void TuneD(int MotorID, double DGain);
+
+            double GetMotorOutput(int MotorID);
+
             void Initialize(Blitz::Models::ArcadeInput *Input);
             void Run();
             void Close();
@@ -32,5 +39,6 @@ namespace Blitz
             Blitz::Models::ArcadeInput *InputData;
             Blitz::Models::DriveMotors *Motors;
             int MotorDirs[4] = {1, 1, 1, 1};
+            double motorValues[4] = {0, 0, 0, 0};
     };
 }

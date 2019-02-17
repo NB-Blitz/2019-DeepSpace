@@ -20,12 +20,12 @@ namespace Blitz
 
                 DriveMotors() {}
 
-                DriveMotors(TalonSRX * Motor1, TalonSRX * Motor2, TalonSRX * Motor3, TalonSRX * Motor4)
+                DriveMotors(TalonSRX * LeftFrontMotor, TalonSRX * LeftBackMotor, TalonSRX * RightFrontMotor, TalonSRX * RightBackMotor)
                 {
-                    this->Motor1 = Motor1;
-                    this->Motor2 = Motor2;
-                    this->Motor3 = Motor3;
-                    this->Motor4 = Motor4;                                                                                                                                                                                                        
+                    this->Motor1 = LeftFrontMotor;
+                    this->Motor2 = LeftBackMotor;
+                    this->Motor3 = RightFrontMotor;
+                    this->Motor4 = RightBackMotor;
                 }            
         };
 
@@ -41,6 +41,12 @@ namespace Blitz
                     this->YValue = YValue;
                     this->ZValue = ZValue;
                 }
+
+                ArcadeInput()
+                {
+                    YValue = 0;
+                    ZValue = 0;
+                }
         };
 
         // Joystick Data for Tank Drive
@@ -49,11 +55,18 @@ namespace Blitz
             public:
                 double LeftValue;  // Left Joystick Speed
                 double RightValue; // Right Joystick Speed
+
                 TankInput(double LeftValue, double RightValue)
                 {
                     this->LeftValue = LeftValue;
                     this->RightValue = RightValue;                        
                 }                                
+
+                TankInput()
+                {
+                    LeftValue = 0;
+                    RightValue = 0;
+                }
         };
 
         // Joystick Data for Mecanum Drive
@@ -69,6 +82,13 @@ namespace Blitz
                     this->XValue = XValue;
                     this->YValue = YValue;
                     this->ZValue = ZValue;
+                }
+
+                MecanumInput()
+                {
+                    XValue = 0;
+                    YValue = 0;
+                    ZValue = 0;
                 }
         };
 
@@ -87,6 +107,14 @@ namespace Blitz
                     this->YValue = YValue;
                     this->ZValue = ZValue;
                     this-> DriveMode = DriveMode;
+                }
+
+                OctocanumInput()
+                {
+                    XValue = 0;
+                    YValue = 0;
+                    ZValue = 0;
+                    DriveMode = 0;
                 }
         };
     }

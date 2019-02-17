@@ -1,13 +1,12 @@
-#ifndef SRC_MANIPULATOR_HPP_
-#define SRC_MANIPULATOR_HPP_
+#pragma once
 
 enum armAxis
 { 
   Shoulder_Axis = 0,
   Elbow_Axis = 1,
   Wrist_Axis = 2
-};
 
+};
 enum customSpeed
 {
   Off = 0,
@@ -16,14 +15,41 @@ enum customSpeed
 
 #include "frc/WPILib.h"
 #include "ctre/Phoenix.h"
+#include <BlitzLib/BlitzLib.hpp>
 
-namespace frc
+namespace Blitz
 {
     class Manipulator
     {
+        public:
+
+            Manipulator();
+
+            void ResetPosition();
+            void MoveManipulatorSpeed(double speed);
+            void MoveManipulatorPosition(double diameter);
+
+            void manipSet(double speed, int axisID, double rawHome); //PercentageOutput (No PID)
+            void manipSetToDegrees(double degrees, int axisID, double rawHome);
+            double getRawUnits(int axisID);
+            double getDegrees(int axisID, double rawHome); //0 is Main, 1 is Secondary...
+            void resetDegrees(int axisID); //See above
+            double getAngleForCoordinates(double x, double y, int axisID); //used by next method
+            void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
+            bool isPossible(double x, double y);
+            double getAngleForParallel(double x, double y); 
+            void moveToParallel(double x, double y, double rawHomeWrist);
+
+            double currentPosition = 0;
+
         private:
             
-            //For Main Axis
+            const double SMALL_GEAR_TEETH = 24;
+            const double LARGE_GEAR_TEETH = 57;
+            const double PULSES_PER_ROTATION = 180;
+
+            const double PULSES_PER_ANGLE_SMALL_GEAR = ((PULSES_PER_ROTATION/LARGE_GEAR_TEETH) * SMALL_GEAR_TEETH)/360;
+
             const double LENGTH_SHOULDER = 25;
             const double MAX_RANGE_SHOULDER = 270;
             const double COUNTS_PER_QUARTER_SHOULDER = 80; //Placeholder
@@ -43,33 +69,11 @@ namespace frc
             const double TO_DEGREES_WRIST = COUNTS_PER_QUARTER_WRIST / 90;
             const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST = 80; //True Zero = faces previous axis
 
+            int direction = 1;
 
-           /*
-                CAUTION!
-                Setting motors to move to a degree lower than DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO constant will cause unexpected behavior 
-           */
-
-            //Dimensions of robot (for isPossible frc rules)
-            /*
-            
-            */
-
+            frc::DigitalInput LimitSwitch;
+            frc::Counter PositionCounter;
+            TalonSRX ClawTalon;
             TalonSRX Shoulder_Motor, Elbow_Motor, Wrist_Motor;
-
-        public:
-            Manipulator();
-            void manipSet(double speed, int axisID, double rawHome); //PercentageOutput (No PID)
-            void manipSetToDegrees(double degrees, int axisID, double rawHome);
-            double getRawUnits(int axisID);
-            double getDegrees(int axisID, double rawHome); //0 is Main, 1 is Secondary...
-            void resetDegrees(int axisID); //See above
-            double getAngleForCoordinates(double x, double y, int axisID); //used by next method
-            void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
-            bool isPossible(double x, double y);
-            double getAngleForParallel(double x, double y); 
-            void moveToParallel(double x, double y, double rawHomeWrist);
-
     };
 }
-
-#endif
