@@ -10,6 +10,7 @@ Robot::Robot() :
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
+  Xbox2(1),
   LineTracker(),
   Ultrasonics(0, 1),
   AutoManager(),
@@ -20,12 +21,28 @@ Robot::Robot() :
 
 void Robot::RobotInit() 
 {
-  
+  MecanumDrive.Initialize(&MecanumInput);
+  MecanumDrive.SetMotorDirection(0, -1);
+  MecanumDrive.SetMotorDirection(1, -1);
+  MecanumDrive.SetMotorDirection(2, -1);
+  MecanumDrive.SetMotorDirection(3, -1);
+
+
+  frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
+  frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
+  frc::SmartDashboard::PutNumber("IGain", Blitz::DriveReference::MOTOR1_kI);
+  frc::SmartDashboard::PutNumber("DGain", Blitz::DriveReference::MOTOR1_kD);
+  frc::SmartDashboard::PutNumber("MotorNum", 1);
 }
 
 void Robot::Autonomous() 
 {
-  
+  while(IsAutonomous() && IsEnabled())
+  {
+    AutoManager.DriveToBall(&MecanumInput);
+
+    MecanumDrive.Run();
+  }
 }
 
 void Robot::OperatorControl() 
@@ -110,11 +127,94 @@ void Robot::OperatorControl()
         }
       }
     }
-  frc::SmartDashboard::PutNumber("Shoulder Motor Degrees", Manip.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
-  frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
-  frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
-  frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
-  frc::Wait(0.005);
+    frc::SmartDashboard::PutNumber("Shoulder Motor Degrees", Manip.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
+    frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
+    frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
+    frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
+
+    Xbox2.update();
+    LineTracker.Update();
+	
+
+    double XInput = -Xbox2.LeftX;
+    double YInput = Xbox2.LeftY;
+    double ZInput = -Xbox2.RightX;
+
+    if (Xbox2.RightStickButton)
+    {
+      XInput = LineTracker.GetDirections()[0];
+      YInput = LineTracker.GetDirections()[1];
+      ZInput = LineTracker.GetDirections()[2];
+    }
+    if (Ultrasonics.willCrash() && YInput > 0)
+    {
+      YInput = 0;
+    }
+
+    if(fabs(XInput) < .1)
+    {
+      XInput = 0;
+    }
+
+    if(fabs(YInput) < .1)
+    {
+      YInput = 0;
+    }
+
+    if(fabs(ZInput) < .1)
+    {
+      ZInput = 0;
+    }
+
+    MecanumInput.XValue = (XInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
+    MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
+    MecanumInput.ZValue = (ZInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
+
+    if(Xbox2.LeftBumper)
+    {
+      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
+    }
+    else if(Xbox2.RightBumper)
+    {
+      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
+    }
+
+    if(Xbox2.LeftTrigger > .2)
+    {
+      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox2.LeftTrigger;
+    }
+    else if(Xbox2.RightTrigger > .2)
+    {
+      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.RightTrigger;
+    }
+
+    if(Xbox2.AButton)
+    {
+      AutoManager.DriveToBall(&MecanumInput);
+    }
+    
+    MecanumDrive.Run();
+
+    frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
+    frc::SmartDashboard::PutNumber("BackLeftJoyStick", MecanumDrive.GetMotorOutput(2));
+    frc::SmartDashboard::PutNumber("FrontRightJoyStick", MecanumDrive.GetMotorOutput(3));
+    frc::SmartDashboard::PutNumber("BackRightJoyStick", MecanumDrive.GetMotorOutput(4));
+
+    frc::SmartDashboard::PutNumber("FrontLeftEncoder", -LeftFrontMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("BackLeftEncoder", -LeftBackMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
+
+    if(Xbox2.RightBumper)
+    {
+      Manip.MoveManipulatorPosition(12);
+    }
+    else if(Xbox2.LeftBumper)
+    {
+      Manip.ResetPosition();
+    }
+
+    frc::Wait(0.005);
   }
 }
 /*
@@ -261,9 +361,93 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
         //Go to default position
       }
     }
-  frc::SmartDashboard::PutBoolean("Manual Enabled", manualToggle);
-  frc::SmartDashboard::PutBoolean("Ball Mode", ballToggle);
-  frc::SmartDashboard::PutBoolean("Disc Mode", !ballToggle);
+    frc::SmartDashboard::PutBoolean("Manual Enabled", manualToggle);
+    frc::SmartDashboard::PutBoolean("Ball Mode", ballToggle);
+    frc::SmartDashboard::PutBoolean("Disc Mode", !ballToggle);
+
+    Xbox2.update();
+    LineTracker.Update();
+	
+
+    double XInput = -Xbox2.LeftX;
+    double YInput = Xbox2.LeftY;
+    double ZInput = -Xbox2.RightX;
+
+    if (Xbox2.RightStickButton)
+    {
+      XInput = LineTracker.GetDirections()[0];
+      YInput = LineTracker.GetDirections()[1];
+      ZInput = LineTracker.GetDirections()[2];
+    }
+    if (Ultrasonics.willCrash() && YInput > 0)
+    {
+      YInput = 0;
+    }
+
+    if(fabs(XInput) < .1)
+    {
+      XInput = 0;
+    }
+
+    if(fabs(YInput) < .1)
+    {
+      YInput = 0;
+    }
+
+    if(fabs(ZInput) < .1)
+    {
+      ZInput = 0;
+    }
+
+    MecanumInput.XValue = (XInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
+    MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
+    MecanumInput.ZValue = (ZInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
+
+    if(Xbox2.LeftBumper)
+    {
+      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
+    }
+    else if(Xbox2.RightBumper)
+    {
+      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
+    }
+
+    if(Xbox2.LeftTrigger > .2)
+    {
+      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox2.LeftTrigger;
+    }
+    else if(Xbox2.RightTrigger > .2)
+    {
+      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.RightTrigger;
+    }
+
+    if(Xbox2.AButton)
+    {
+      AutoManager.DriveToBall(&MecanumInput);
+    }
+    
+    MecanumDrive.Run();
+
+    frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
+    frc::SmartDashboard::PutNumber("BackLeftJoyStick", MecanumDrive.GetMotorOutput(2));
+    frc::SmartDashboard::PutNumber("FrontRightJoyStick", MecanumDrive.GetMotorOutput(3));
+    frc::SmartDashboard::PutNumber("BackRightJoyStick", MecanumDrive.GetMotorOutput(4));
+
+    frc::SmartDashboard::PutNumber("FrontLeftEncoder", -LeftFrontMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("BackLeftEncoder", -LeftBackMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
+
+    if(Xbox2.RightBumper)
+    {
+      Manip.MoveManipulatorPosition(12);
+    }
+    else if(Xbox2.LeftBumper)
+    {
+      Manip.ResetPosition();
+    }
+
+    frc::Wait(0.005);
   }
 
 }
