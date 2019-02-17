@@ -28,24 +28,19 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
-  areLimits = Blitz_Joy.getButton(10, Shoulder_Axis);
   double rawWrist;
   double wristMin = 1024, wristMax = 0;
-  if (!areLimits) //It is assumed that the robot is set in the home position (both axes are at about 90 degrees)
-  {
-    homeEncoderValueShoulder = 0;
-    homeEncoderValueElbow = 0;
-    //homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
-    //homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
-    homeEncoderValueWrist = Manip.getRawUnits(Wrist_Axis);
-    frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
-    frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
-    frc::SmartDashboard::PutNumber("Home Encoder - Wrist", homeEncoderValueWrist);
-    
-  }
+  homeEncoderValueShoulder = 0;
+  homeEncoderValueElbow = 0;
+  //homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
+  //homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
+  homeEncoderValueWrist = Manip.getRawUnits(Wrist_Axis);
+  frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
+  frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
+  frc::SmartDashboard::PutNumber("Home Encoder - Wrist", homeEncoderValueWrist);
   while (IsOperatorControl() && IsEnabled()) 
   {
-    Manip.manipSet(0.4 * Blitz_Joy.getAxis(Y_Axis, Shoulder_Axis), Wrist_Axis);
+    Manip.manipSet(0.4 * Blitz_Joy.getAxis(Y_Axis, Shoulder_Axis), Wrist_Axis, homeEncoderValueWrist);
     frc::SmartDashboard::PutNumber("Y-Axis", Blitz_Joy.getAxis(Y_Axis, Shoulder_Axis));
     rawWrist = Manip.getRawUnits(Wrist_Axis);
     if (rawWrist > wristMax)
@@ -61,147 +56,62 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("Wrist Pot Raw Max", wristMax);
     frc::SmartDashboard::PutNumber("Wrist Pot Raw Min", wristMin);
     frc::SmartDashboard::PutNumber("Wrist Pot Degrees", Manip.getDegrees(Wrist_Axis, homeEncoderValueWrist));
-    /*
-    if (areLimits) //Code for presence of limit switches
-    {
-      if (initialReset)
-      {
-        if (Manip.resetToEncoder(Shoulder_Axis) && Manip.resetToEncoder(Elbow_Axis))
-        {
-          initialReset = false;
-        }
-      }
-      else
-      {
-        yAxisShoulder = Blitz_Joy.getAxis(Y_Axis, Shoulder_Joystick); 
-        yAxisElbow = Blitz_Joy.getAxis(Y_Axis, Elbow_Joystick);
+    yAxisShoulder = Blitz_Joy.getAxis(Y_Axis, Shoulder_Joystick); 
+    yAxisElbow = Blitz_Joy.getAxis(Y_Axis, Elbow_Joystick);
 
-        if (Blitz_Joy.getButton(3, Shoulder_Joystick))
+    if (Blitz_Joy.getButton(3, Shoulder_Joystick))
+    {
+      Manip.moveToCoordinates(10, -3.5, homeEncoderValueShoulder, homeEncoderValueElbow); //Low
+    }
+    else if (Blitz_Joy.getButton(4, Shoulder_Joystick))
+    {
+      Manip.moveToCoordinates(10, 3, homeEncoderValueShoulder, homeEncoderValueElbow); //Mid
+    }
+    else if (Blitz_Joy.getButton(5, Shoulder_Joystick))
+    {
+      Manip.moveToCoordinates(10, 8, homeEncoderValueShoulder, homeEncoderValueElbow); //High
+    }
+    else
+    {
+      //Shoulder Axis
+      if (Blitz_Joy.getButton(2, Shoulder_Joystick))
+      {
+        Manip.manipSetToDegrees(180, Shoulder_Axis, homeEncoderValueShoulder);
+      }
+      else 
+      {
+        
+        if (yAxisShoulder > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisShoulder < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
         {
-          Manip.moveToCoordinates(10, -3.5); //Low
-        }
-        else if (Blitz_Joy.getButton(4, Shoulder_Joystick))
-        {
-          Manip.moveToCoordinates(10, 3); //Mid
-        }
-        else if (Blitz_Joy.getButton(5, Shoulder_Joystick))
-        {
-          Manip.moveToCoordinates(10, 8); //High
+          Manip.manipSet(yAxisShoulder, Shoulder_Axis, homeEncoderValueShoulder);
         }
         else
         {
-          //Shoulder Axis
-          if (Blitz_Joy.getButton(1, Shoulder_Joystick)) //Reset To Encoder
-          {
-            Manip.resetToEncoder(Shoulder_Axis);
-          }
-          else if (Blitz_Joy.getButton(2, Shoulder_Joystick))
-          {
-            Manip.manipSetToDegrees(180, Shoulder_Axis);
-          }
-          else
-          {
-            if (yAxisShoulder > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisShoulder < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
-            {
-              Manip.manipSet(yAxisShoulder, Shoulder_Axis);
-            }
-            else
-            {
-              Manip.manipSet(Off, Shoulder_Axis);
-            }
-          }
+          Manip.manipSet(Off, Shoulder_Axis, homeEncoderValueShoulder);
+        }          
+      }
 
-          //Elbow Axis
-          if (Blitz_Joy.getButton(1, Elbow_Joystick))
-          {
-            Manip.resetToEncoder(Elbow_Axis);
-          }
-          else if (Blitz_Joy.getButton(2, Elbow_Joystick))
-          {
-            Manip.manipSetToDegrees(180, Elbow_Axis);
-          }
-          else
-          {
-            if (yAxisElbow > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisElbow < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
-            {
-              Manip.manipSet(yAxisElbow, Elbow_Axis);
-            }
-            else
-            {
-              Manip.manipSet(Off, Elbow_Axis);
-            }
-          }
+      //Elbow Axis
+      if (Blitz_Joy.getButton(2, Elbow_Joystick))
+      {
+        Manip.manipSetToDegrees(180, Elbow_Axis, homeEncoderValueElbow);
+      }
+      else 
+      {
+        if (yAxisElbow > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisElbow < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+        {
+          Manip.manipSet(yAxisElbow, Elbow_Axis, homeEncoderValueElbow);
+        }
+        else
+        {
+          Manip.manipSet(Off, Elbow_Axis, homeEncoderValueElbow);
         }
       }
-    frc::SmartDashboard::PutNumber("Shoulder Motor Degrees", Manip.getDegrees(Shoulder_Axis));
-    frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
-    frc::SmartDashboard::PutNumber("Shoulder Motor Degrees (If Limits existed)", Manip.getDegrees(Shoulder_Axis));
-    frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis));
-    frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
-    frc::SmartDashboard::PutNumber("Elbow Motor Degrees (If Limits existed)", Manip.getDegrees(Elbow_Axis));
     }
-    
-    else //Code for lack of limit switches
-    {
-      yAxisShoulder = Blitz_Joy.getAxis(Y_Axis, Shoulder_Joystick); 
-      yAxisElbow = Blitz_Joy.getAxis(Y_Axis, Elbow_Joystick);
-
-      if (Blitz_Joy.getButton(3, Shoulder_Joystick))
-      {
-        Manip.moveToCoordinates(10, -3.5, false, homeEncoderValueShoulder, homeEncoderValueElbow); //Low
-      }
-      else if (Blitz_Joy.getButton(4, Shoulder_Joystick))
-      {
-        Manip.moveToCoordinates(10, 3, false, homeEncoderValueShoulder, homeEncoderValueElbow); //Mid
-      }
-      else if (Blitz_Joy.getButton(5, Shoulder_Joystick))
-      {
-        Manip.moveToCoordinates(10, 8, false, homeEncoderValueShoulder, homeEncoderValueElbow); //High
-      }
-      else
-      {
-        //Shoulder Axis
-        if (Blitz_Joy.getButton(2, Shoulder_Joystick))
-        {
-          Manip.manipSetToDegrees(180, Shoulder_Axis, false, homeEncoderValueShoulder);
-        }
-        else 
-        {
-          
-          if (yAxisShoulder > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisShoulder < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
-          {
-            Manip.manipSet(yAxisShoulder, Shoulder_Axis, false, homeEncoderValueShoulder);
-          }
-          else
-          {
-            Manip.manipSet(Off, Shoulder_Axis, false, homeEncoderValueShoulder);
-          }          
-        }
-
-        //Elbow Axis
-        if (Blitz_Joy.getButton(2, Elbow_Joystick))
-        {
-          Manip.manipSetToDegrees(180, Elbow_Axis, false, homeEncoderValueElbow);
-        }
-        else 
-        {
-          if (yAxisElbow > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisElbow < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
-          {
-            Manip.manipSet(yAxisElbow, Elbow_Axis, false, homeEncoderValueElbow);
-          }
-          else
-          {
-            Manip.manipSet(Off, Elbow_Axis, false, homeEncoderValueElbow);
-          }
-        }
-      }
-    frc::SmartDashboard::PutNumber("Shoulder Motor Degrees", Manip.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
-    frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
-    frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
-    frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
-    }
-  frc::SmartDashboard::PutBoolean("AreLimits?", areLimits);
-  */
+  frc::SmartDashboard::PutNumber("Shoulder Motor Degrees", Manip.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
+  frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
+  frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
+  frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
   frc::Wait(0.005);
   }
 }
@@ -227,13 +137,10 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
   bool isBackDown = false;
   double leftYAxis;
   double rightYAxis;
-  if (!areLimits) //It is assumed that the robot is set in the home position (both axes are at about 90 degrees)
-  {
-    homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
-    homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
-    frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
-    frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
-  }
+  homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
+  homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
+  frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
+  frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
   while(IsTest() && IsEnabled())
   {
     //Toggle between Ball and Disc
@@ -329,21 +236,21 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
         //Manual Shoulder Code
         if (abs(leftYAxis) > 0.1)
         {
-          Manip.manipSet(leftYAxis * 0.4, Shoulder_Axis, areLimits, homeEncoderValueShoulder);
+          Manip.manipSet(leftYAxis * 0.4, Shoulder_Axis, homeEncoderValueShoulder);
         }
         else
         {
-          Manip.manipSet(Off, Shoulder_Axis);
+          Manip.manipSet(Off, Shoulder_Axis, homeEncoderValueShoulder);
         }
         
         //Manual Elbow Code
         if (abs(rightYAxis) > 0.1)
         {
-          Manip.manipSet(rightYAxis * 0.4, Elbow_Axis, areLimits, homeEncoderValueElbow);
+          Manip.manipSet(rightYAxis * 0.4, Elbow_Axis, homeEncoderValueElbow);
         }
         else
         {
-          Manip.manipSet(Off, Elbow_Axis);
+          Manip.manipSet(Off, Elbow_Axis, homeEncoderValueElbow);
         }
 
       }

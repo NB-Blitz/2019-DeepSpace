@@ -22,24 +22,25 @@ namespace frc
     class Manipulator
     {
         private:
+            
             //For Main Axis
+            const double LENGTH_SHOULDER = 25;
             const double MAX_RANGE_SHOULDER = 270;
-            const double LENGTH_SHOULDER = 9.5; //in inches
-            const double ENCODER_COUNTS_PER_ROTATION_SHOULDER = 7500;
-            const double TO_DEGREES_SHOULDER = ENCODER_COUNTS_PER_ROTATION_SHOULDER / 360;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER = 90; //True Zero = faces parallel to ground and faces forward
+            const double COUNTS_PER_QUARTER_SHOULDER = 80; //Placeholder
+            const double TO_DEGREES_SHOULDER = COUNTS_PER_QUARTER_SHOULDER / 90;
+            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER = 90; //True Zero = faces ground
 
             //For Secondary Axis
+            const double LENGTH_ELBOW = 23;
             const double MAX_RANGE_ELBOW = 270;
-            const double LENGTH_ELBOW = 4.5; //In inches
-            const double ENCODER_COUNTS_PER_ROTATION_ELBOW = 8200;
-            const double TO_DEGREES_ELBOW = ENCODER_COUNTS_PER_ROTATION_ELBOW / 360;
+            const double COUNTS_PER_QUARTER_ELBOW = 80; //Placeholder
+            const double TO_DEGREES_ELBOW = COUNTS_PER_QUARTER_ELBOW / 90;
             const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW = 90; //True Zero = faces previous axis
-
+            
             //For Wrist Axis
             const double MAX_RANGE_WRIST = 260;
-            const double COUNTS_PER_QUARTER = 80; //for 90 degrees, this is how many counts I get
-            const double TO_DEGREES_WRIST = COUNTS_PER_QUARTER / 90;
+            const double COUNTS_PER_QUARTER_WRIST = 80; //for 90 degrees, this is how many counts I get
+            const double TO_DEGREES_WRIST = COUNTS_PER_QUARTER_WRIST / 90;
             const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST = 80; //True Zero = faces previous axis
 
 
@@ -54,22 +55,19 @@ namespace frc
             */
 
             TalonSRX Shoulder_Motor, Elbow_Motor, Wrist_Motor;
-            DigitalInput Shoulder_Motor_Limit_Switch, Elbow_Motor_Limit_Switch;
 
         public:
             Manipulator();
-            void manipSet(double speed, int axisID, bool areLimits = true, double rawHome = 0); //PercentageOutput (No PID)
-            void manipSetToDegrees(double degrees, int axisID, bool areLimits = true, double rawHome = 0);
-            bool isLimit(int axisID);
+            void manipSet(double speed, int axisID, double rawHome); //PercentageOutput (No PID)
+            void manipSetToDegrees(double degrees, int axisID, double rawHome);
             double getRawUnits(int axisID);
-            double getDegrees(int axisID, double rawHome = 0); //0 is Main, 1 is Secondary...
+            double getDegrees(int axisID, double rawHome); //0 is Main, 1 is Secondary...
             void resetDegrees(int axisID); //See above
-            bool resetToEncoder(int axisID); //bool returns if the motor and its encoder is reset
             double getAngleForCoordinates(double x, double y, int axisID); //used by next method
-            void moveToCoordinates(double x, double y, bool areLimits = true, double rawHomeShoulder = 0, double rawHomeElbow = 0); //In inches
+            void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
             bool isPossible(double x, double y);
             double getAngleForParallel(double x, double y); 
-            void moveToParallel(double x, double y, bool areLimits = false, double rawHomeWrist = 0);
+            void moveToParallel(double x, double y, double rawHomeWrist);
 
     };
 }

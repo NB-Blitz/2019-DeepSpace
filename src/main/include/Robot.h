@@ -17,13 +17,6 @@ class Robot : public frc::SampleRobot
         void Test() override;
 
     private:
-
-        //Test Variable -> true for limit switches, false for pre-set known
-        bool areLimits = false;
-
-        //if the previous variable is true, these variables are relevant
-        bool initialReset = false;
-
         //if the previous variable is false, these variables are relevant
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
         double yAxisShoulder, yAxisElbow;
