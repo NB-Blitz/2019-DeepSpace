@@ -120,6 +120,15 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
     frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
 
+    if(Xbox.RightBumper)
+    {
+      Manipulator.MoveManipulatorPosition(12);
+    }
+    else if(Xbox.LeftBumper)
+    {
+      Manipulator.ResetPosition();
+    }
+
     frc::Wait(0.005);
   }
 }
