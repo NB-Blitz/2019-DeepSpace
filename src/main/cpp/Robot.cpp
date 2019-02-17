@@ -1,17 +1,19 @@
-/*
-  2/16/2019 4:20 P.M.
-  
-  TO-DO:
-  -Work toward removing Limit Switches from code completely and replace with Potentiometers
-  -In Robot.cpp, remove areLimits = true code
-  -Add remaining potentiometers to code and find coefficients
-*/
-
 #include "Robot.h"
 
 Robot::Robot() :
-  Manip(),
-  Blitz_Joy()
+  LeftFrontMotor(0),
+  LeftBackMotor(1),
+  RightFrontMotor(2),
+  RightBackMotor(3),
+  Motors(&LeftFrontMotor, &LeftBackMotor, &RightFrontMotor, &RightBackMotor),
+  Logger(0),
+  MecanumInput(),
+  MecanumDrive(&Motors, &Logger),
+  Xbox(0),
+  LineTracker(),
+  Ultrasonics(0, 1),
+  AutoManager(),
+  Manip()
 {
 
 }
@@ -40,8 +42,8 @@ void Robot::OperatorControl()
   frc::SmartDashboard::PutNumber("Home Encoder - Wrist", homeEncoderValueWrist);
   while (IsOperatorControl() && IsEnabled()) 
   {
-    Manip.manipSet(0.4 * Blitz_Joy.getAxis(Y_Axis, Shoulder_Axis), Wrist_Axis, homeEncoderValueWrist);
-    frc::SmartDashboard::PutNumber("Y-Axis", Blitz_Joy.getAxis(Y_Axis, Shoulder_Axis));
+    Manip.manipSet(0.4 * Xbox.LeftY, Wrist_Axis, homeEncoderValueWrist);
+    frc::SmartDashboard::PutNumber("Y-Axis", Xbox.LeftY);
     rawWrist = Manip.getRawUnits(Wrist_Axis);
     if (rawWrist > wristMax)
     {
@@ -56,32 +58,32 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("Wrist Pot Raw Max", wristMax);
     frc::SmartDashboard::PutNumber("Wrist Pot Raw Min", wristMin);
     frc::SmartDashboard::PutNumber("Wrist Pot Degrees", Manip.getDegrees(Wrist_Axis, homeEncoderValueWrist));
-    yAxisShoulder = Blitz_Joy.getAxis(Y_Axis, Shoulder_Joystick); 
-    yAxisElbow = Blitz_Joy.getAxis(Y_Axis, Elbow_Joystick);
+    yAxisShoulder = Xbox.LeftY;
+    yAxisElbow = Xbox.RightY;
 
-    if (Blitz_Joy.getButton(3, Shoulder_Joystick))
+    if (Xbox.AButton)
     {
       Manip.moveToCoordinates(10, -3.5, homeEncoderValueShoulder, homeEncoderValueElbow); //Low
     }
-    else if (Blitz_Joy.getButton(4, Shoulder_Joystick))
+    else if (Xbox.BButton)
     {
       Manip.moveToCoordinates(10, 3, homeEncoderValueShoulder, homeEncoderValueElbow); //Mid
     }
-    else if (Blitz_Joy.getButton(5, Shoulder_Joystick))
+    else if (Xbox.YButton)
     {
       Manip.moveToCoordinates(10, 8, homeEncoderValueShoulder, homeEncoderValueElbow); //High
     }
     else
     {
       //Shoulder Axis
-      if (Blitz_Joy.getButton(2, Shoulder_Joystick))
+      if (Xbox.XButton)
       {
         Manip.manipSetToDegrees(180, Shoulder_Axis, homeEncoderValueShoulder);
       }
       else 
       {
         
-        if (yAxisShoulder > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisShoulder < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+        if (yAxisShoulder > 0.1 || yAxisShoulder < -0.1)
         {
           Manip.manipSet(yAxisShoulder, Shoulder_Axis, homeEncoderValueShoulder);
         }
@@ -92,13 +94,13 @@ void Robot::OperatorControl()
       }
 
       //Elbow Axis
-      if (Blitz_Joy.getButton(2, Elbow_Joystick))
+      if (Xbox.LeftBumper)
       {
         Manip.manipSetToDegrees(180, Elbow_Axis, homeEncoderValueElbow);
       }
       else 
       {
-        if (yAxisElbow > Blitz_Joy.JOYSTICK_DEAD_ZONE || yAxisElbow < -Blitz_Joy.JOYSTICK_DEAD_ZONE)
+        if (yAxisElbow > 0.1 || yAxisElbow < -0.1)
         {
           Manip.manipSet(yAxisElbow, Elbow_Axis, homeEncoderValueElbow);
         }
@@ -144,21 +146,21 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
   while(IsTest() && IsEnabled())
   {
     //Toggle between Ball and Disc
-    if (Blitz_Joy.getXBoxButton(XBox_Start_Button) && !isStartDown)
+    if (Xbox.Xbox.GetRawButton(7) && !isStartDown)
     {
       ballToggle = !ballToggle;
     }
-    isStartDown = Blitz_Joy.getXBoxButton(XBox_Start_Button);
+    isStartDown = Xbox.Xbox.GetRawButton(7);
 
     //Toggle between allowed manual and disabled manual (fully automatic)
-    if (Blitz_Joy.getXBoxButton(XBox_Back_Button) && !isBackDown)
+    if (Xbox.Xbox.GetRawButton(6) && !isBackDown)
     { 
       manualToggle = !manualToggle;
     }
-    isBackDown = Blitz_Joy.getXBoxButton(XBox_Back_Button);
+    isBackDown = Xbox.Xbox.GetRawButton(6);
 
     //Hard-coded positions
-    if (Blitz_Joy.getXBoxButton(XBox_Y_Button))
+    if (Xbox.YButton)
     {
       if (ballToggle)
       {
@@ -170,7 +172,7 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
       }
       
     }
-    else if (Blitz_Joy.getXBoxButton(XBox_B_Button))
+    else if (Xbox.BButton)
     {
       if (ballToggle)
       {
@@ -181,7 +183,7 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
         //Go to disc medium position on ship
       }
     } 
-    else if (Blitz_Joy.getXBoxButton(XBox_A_Button))
+    else if (Xbox.AButton)
     {
       if (ballToggle)
       {
@@ -192,7 +194,7 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
         //Go to disc low position on ship
       }
     } 
-    else if (Blitz_Joy.getXBoxButton(XBox_X_Button))
+    else if (Xbox.XButton)
     {
       if (ballToggle)
       {
@@ -203,7 +205,7 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
         //Go to disc habitat position
       }
     }
-    else if (Blitz_Joy.getXBoxButton(XBox_Left_Bumper))
+    else if (Xbox.LeftBumper)
     {
       if (ballToggle)
       {
@@ -214,7 +216,7 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
         //Grab disc from the ground
       }
     } 
-    else if (Blitz_Joy.getXBoxButton(XBox_Right_Bumper))
+    else if (Xbox.RightBumper)
     {
       if (ballToggle)
       {
@@ -230,8 +232,8 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
     {
       if (manualToggle)
       {
-        leftYAxis = Blitz_Joy.getXBoxAxis(XBox_Left_Y_Axis);
-        rightYAxis = Blitz_Joy.getXBoxAxis(XBox_Right_Y_Axis);
+        leftYAxis = Xbox.LeftY;
+        rightYAxis = Xbox.RightY;
         
         //Manual Shoulder Code
         if (abs(leftYAxis) > 0.1)

@@ -6,7 +6,6 @@
 #include <Manipulator.hpp>
 #include <Blitz_Joystick.hpp>
 #include <Math.h>
-
 #include "Autonomous.hpp"
 
 class Robot : public frc::SampleRobot 
@@ -30,8 +29,7 @@ class Robot : public frc::SampleRobot
         Blitz::LineTrack LineTracker;
         Blitz::Ultrasonic Ultrasonics;
         Blitz::Autonomous AutoManager;
-        frc::Manipulator Manip;
-        frc::Blitz_Joystick Blitz_Joy;
+        Blitz::Manipulator Manip;
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
         double yAxisShoulder, yAxisElbow;
 };

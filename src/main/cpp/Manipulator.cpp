@@ -3,16 +3,19 @@
 #include <iostream>
 
 //Pete's Roborio is Team Number 5150
-frc::Manipulator::Manipulator() :
+Blitz::Manipulator::Manipulator() :
     Shoulder_Motor(3), //Placeholder ID
     Elbow_Motor(10),    //Placeholder ID
-    Wrist_Motor(2) //Placeholder ID
+    Wrist_Motor(2), //Placeholder ID
+    LimitSwitch(0),
+    ClawTalon(4),
+    PositionCounter(1)
 
 {
 
 }
 //Main has opposite direction to secondary (in degrees)
-void frc::Manipulator::manipSet(double speed, int axisID, double rawHome) //Moves Manipulator in accordance to the joystick without PID
+void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Moves Manipulator in accordance to the joystick without PID
 {
     if (axisID == Shoulder_Axis)
     {
@@ -61,7 +64,7 @@ void frc::Manipulator::manipSet(double speed, int axisID, double rawHome) //Move
     }
 }
 
-void frc::Manipulator::manipSetToDegrees(double degrees, int axisID, double rawHome)
+void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double rawHome)
 {
     double currentDegrees;
     currentDegrees = getDegrees(axisID, rawHome);
@@ -99,7 +102,7 @@ void frc::Manipulator::manipSetToDegrees(double degrees, int axisID, double rawH
     }
 }
 
-double frc::Manipulator::getRawUnits(int axisID)
+double Blitz::Manipulator::getRawUnits(int axisID)
 {
     if (axisID == Shoulder_Axis)
     {
@@ -119,7 +122,7 @@ double frc::Manipulator::getRawUnits(int axisID)
     }
 }
 
-double frc::Manipulator::getDegrees(int axisID, double rawHome) //Returns degrees from an encoder converting from raw counts
+double Blitz::Manipulator::getDegrees(int axisID, double rawHome) //Returns degrees from an encoder converting from raw counts
 {
     if (axisID == Shoulder_Axis)
     {
@@ -142,7 +145,7 @@ double frc::Manipulator::getDegrees(int axisID, double rawHome) //Returns degree
     }   
 }
 
-void frc::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 degrees
+void Blitz::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 degrees
 {
     if (axisID == Shoulder_Axis)
     {
@@ -160,7 +163,7 @@ void frc::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 degree
 }
 
 //Angles are relative to true zero degrees (second axis 0 degrees means it moves in opposite direction of main axis)
-double frc::Manipulator::getAngleForCoordinates(double x, double y, int axisID) //Returns the angle of an axis necessary for reaching the given coordinates
+double Blitz::Manipulator::getAngleForCoordinates(double x, double y, int axisID) //Returns the angle of an axis necessary for reaching the given coordinates
 {
     double pi = 3.14159265358979323846;
     double radiansToDegrees = (180 / pi);
@@ -183,7 +186,7 @@ double frc::Manipulator::getAngleForCoordinates(double x, double y, int axisID) 
         //all functions are in radians -> I return degrees
 }
 
-void frc::Manipulator::moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow) //Moves both axes to the angles necessary to reach the given coordinates
+void Blitz::Manipulator::moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow) //Moves both axes to the angles necessary to reach the given coordinates
 {
     if (isPossible(x,y))
     {
@@ -191,7 +194,7 @@ void frc::Manipulator::moveToCoordinates(double x, double y, double rawHomeShoul
         manipSetToDegrees(getAngleForCoordinates(x,y,Elbow_Axis), Elbow_Axis, rawHomeElbow);
     }  
 }
-bool frc::Manipulator::isPossible(double x, double y)
+bool Blitz::Manipulator::isPossible(double x, double y)
 {
     double angle1 = getAngleForCoordinates(x,y,Shoulder_Axis);
     double angle2 = getAngleForCoordinates(x,y,Elbow_Axis);
@@ -210,14 +213,84 @@ bool frc::Manipulator::isPossible(double x, double y)
     }
     return false;
 }
-double frc::Manipulator::getAngleForParallel(double x, double y)
+double Blitz::Manipulator::getAngleForParallel(double x, double y)
 {
     double angle1 = getAngleForCoordinates(x,y,0);
     double angle2 = getAngleForCoordinates(x,y,1);
     return (360 - angle1 - angle2 - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST);    
 }
 
-void frc::Manipulator::moveToParallel(double x, double y, double rawHomeWrist)
+void Blitz::Manipulator::moveToParallel(double x, double y, double rawHomeWrist)
 {
     manipSetToDegrees(getAngleForParallel(x,y), Wrist_Axis, rawHomeWrist);
+}
+
+void Blitz::Manipulator::ResetPosition()
+{
+    if(LimitSwitch.Get())
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, 1);
+    }
+    else
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, 0);
+        PositionCounter.Reset();
+        currentPosition = 0;
+    }
+}
+
+void Blitz::Manipulator::MoveManipulatorSpeed(double speed)
+{
+    ClawTalon.Set(ControlMode::PercentOutput, speed);
+
+    if(speed < 0)
+    {
+        currentPosition += PositionCounter.Get() * direction;
+        PositionCounter.Reset();
+
+        direction = -1;
+    }
+    else if(speed > .05)
+    {
+        currentPosition += PositionCounter.Get() * direction;
+        PositionCounter.Reset();
+
+        direction = 1;
+    }
+}
+
+void Blitz::Manipulator::MoveManipulatorPosition(double diameter)
+{
+    //diameter = 19.575 - diameter;
+
+
+    double angle = ((asin((((diameter/2) - 5.375)/4.25))*(180/3.1459))-90);
+
+    
+    cout << angle << endl;
+
+    int counts = angle * PULSES_PER_ANGLE_SMALL_GEAR;
+
+    //int counts = 30;
+
+    currentPosition += PositionCounter.Get() * direction;
+    PositionCounter.Reset();
+
+    direction = -1;
+
+    if(currentPosition > counts)
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, -.5);
+        direction = -1;
+    }
+    else if(currentPosition < counts)
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, .5);
+        direction = 1;
+    }
+    else 
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, 0);
+    }
+    
 }
