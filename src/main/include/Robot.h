@@ -5,6 +5,8 @@
 #include <ctre/Phoenix.h>
 #include <Math.h>
 
+#include "Autonomous.hpp"
+
 class Robot : public frc::SampleRobot 
 {
     public:
@@ -16,4 +18,14 @@ class Robot : public frc::SampleRobot
         void Test() override;
 
     private:
+        TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
+
+        Blitz::BlitzLogger Logger;
+        Blitz::Models::DriveMotors Motors;
+        Blitz::Models::MecanumInput MecanumInput;
+        Blitz::Mecanum MecanumDrive;
+        Blitz::Joysticks::XboxController Xbox;
+        Blitz::LineTrack LineTracker;
+        Blitz::Ultrasonic Ultrasonics;
+        Blitz::Autonomous AutoManager;
 };
