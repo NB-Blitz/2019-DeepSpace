@@ -1,6 +1,6 @@
 #include "Robot.h"
 
-Robot::Robot()
+Robot::Robot() :
   LeftFrontMotor(0),
   LeftBackMotor(1),
   RightFrontMotor(2),
