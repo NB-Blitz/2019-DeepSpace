@@ -5,8 +5,6 @@
 #include <ctre/Phoenix.h>
 #include <Math.h>
 
-#include "Manipulator.hpp"
-
 class Robot : public frc::SampleRobot 
 {
     public:
@@ -18,7 +16,4 @@ class Robot : public frc::SampleRobot
         void Test() override;
 
     private:
-        Blitz::Joysticks::XboxController Xbox;
-
-        Blitz::Manipulator Claw;
 };
