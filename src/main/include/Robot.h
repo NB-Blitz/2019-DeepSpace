@@ -31,5 +31,5 @@ class Robot : public frc::SampleRobot
         Blitz::Autonomous AutoManager;
         Blitz::Manipulator Manip;
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
-        double yAxisShoulder, yAxisElbow;
+        double yAxisShoulder, yAxisElbow, yAxisWrist;
 };

@@ -12,6 +12,12 @@ enum customSpeed
   Off = 0,
   Max = 1
 };
+enum wristDegrees
+{
+    Parallel = 0,
+    Straight_Down = 90,
+    Straight_Up = -90
+};
 
 #include "frc/WPILib.h"
 #include "ctre/Phoenix.h"
@@ -37,8 +43,7 @@ namespace Blitz
             double getAngleForCoordinates(double x, double y, int axisID); //used by next method
             void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
             bool isPossible(double x, double y);
-            double getAngleForParallel(double x, double y); 
-            void moveToParallel(double x, double y, double rawHomeWrist);
+            void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
 
             double currentPosition = 0;
 

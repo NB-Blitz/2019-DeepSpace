@@ -30,9 +30,10 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
+  homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
   double rawWrist;
   double wristMin = 1024, wristMax = 0;
-  homeEncoderValueShoulder = 0;
+  /*homeEncoderValueShoulder = 0;
   homeEncoderValueElbow = 0;
   //homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
   //homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
@@ -40,8 +41,35 @@ void Robot::OperatorControl()
   frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
   frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
   frc::SmartDashboard::PutNumber("Home Encoder - Wrist", homeEncoderValueWrist);
+  */
   while (IsOperatorControl() && IsEnabled()) 
   {
+    Xbox.update();
+    yAxisShoulder = Xbox.LeftY;
+    yAxisElbow = Xbox.RightY;
+    yAxisWrist = Xbox.LeftX;
+    rawWrist = Manip.getRawUnits(Elbow_Axis);
+    if (rawWrist > wristMax)
+    {
+      wristMax = rawWrist;
+    }
+    else if (rawWrist < wristMin)
+    {
+      wristMin = rawWrist;
+    }
+    frc::SmartDashboard::PutNumber("Elbow Pot Raw Max", wristMax);
+    frc::SmartDashboard::PutNumber("Elbow Pot Raw Min", wristMin);
+    frc::SmartDashboard::PutNumber("LeftY", yAxisShoulder);
+    frc::SmartDashboard::PutNumber("RightY", yAxisElbow);
+    frc::SmartDashboard::PutNumber("LeftX", yAxisWrist);
+    frc::SmartDashboard::PutNumber("Raw Units - Elbow", Manip.getRawUnits(Elbow_Axis));
+    frc::SmartDashboard::PutNumber("Degrees - Elbow", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
+    Manip.manipSet(0.4*yAxisShoulder, Shoulder_Axis, 0);
+    Manip.manipSet(0.4*yAxisElbow, Elbow_Axis, homeEncoderValueElbow);
+    Manip.manipSet(0.4*yAxisWrist, Wrist_Axis, 0);
+
+  /*
+
     Manip.manipSet(0.4 * Xbox.LeftY, Wrist_Axis, homeEncoderValueWrist);
     frc::SmartDashboard::PutNumber("Y-Axis", Xbox.LeftY);
     rawWrist = Manip.getRawUnits(Wrist_Axis);
@@ -60,6 +88,8 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("Wrist Pot Degrees", Manip.getDegrees(Wrist_Axis, homeEncoderValueWrist));
     yAxisShoulder = Xbox.LeftY;
     yAxisElbow = Xbox.RightY;
+    frc::SmartDashboard::PutNumber("LeftY", yAxisShoulder);
+    frc::SmartDashboard::PutNumber("RightY", yAxisElbow);
 
     if (Xbox.AButton)
     {
@@ -114,6 +144,7 @@ void Robot::OperatorControl()
   frc::SmartDashboard::PutNumber("Shoulder Motor Raw Encoder Units", Manip.getRawUnits(Shoulder_Axis));
   frc::SmartDashboard::PutNumber("Elbow Motor Degrees", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
   frc::SmartDashboard::PutNumber("Elbow Motor Raw Encoder Units", Manip.getRawUnits(Elbow_Axis));
+  */
   frc::Wait(0.005);
   }
 }
@@ -145,6 +176,7 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
   frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
   while(IsTest() && IsEnabled())
   {
+    Xbox.update();
     //Toggle between Ball and Disc
     if (Xbox.Xbox.GetRawButton(7) && !isStartDown)
     {
@@ -164,68 +196,85 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
     {
       if (ballToggle)
       {
+        //Manip.moveToCoordinates();
         //Go to ball high position on ship
       }
       else
       {
+        //Manip.moveToCoordinates();
         //Go to disc high position on ship
       }
-      
+      Manip.moveToXDegreesBelowParallel(homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist, Straight_Up);
     }
     else if (Xbox.BButton)
     {
       if (ballToggle)
       {
+        //Manip.moveToCoordinates();
         //Go to ball medium position on ship
       }
       else
       {
+        //Manip.moveToCoordinates();
         //Go to disc medium position on ship
       }
+      Manip.moveToXDegreesBelowParallel(homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist, Straight_Up);
     } 
     else if (Xbox.AButton)
     {
       if (ballToggle)
       {
+        //Manip.moveToCoordinates();
         //Go to ball low position on ship
       }
       else
       {
+        //Manip.moveToCoordinates();
         //Go to disc low position on ship
       }
+      Manip.moveToXDegreesBelowParallel(homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist, Straight_Up);
     } 
     else if (Xbox.XButton)
     {
       if (ballToggle)
       {
+        //Manip.moveToCoordinates();
         //Go to ball habitat position
       }
       else
       {
+        //Manip.moveToCoordinates();
         //Go to disc habitat position
       }
+      Manip.moveToXDegreesBelowParallel(homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist, Straight_Up);
     }
     else if (Xbox.LeftBumper)
     {
       if (ballToggle)
       {
+        //Manip.moveToCoordinates();
         //Grab ball from the ground
       }
       else
       {
+        //Manip.moveToCoordinates();
         //Grab disc from the ground
       }
+      Manip.moveToXDegreesBelowParallel(homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist, Parallel);
     } 
     else if (Xbox.RightBumper)
     {
       if (ballToggle)
       {
+        //Manip.moveToCoordinates();
         //Grab ball from the player station
       }
       else
       {
+        //Manip.moveToCoordinates();
         //Grab disc from the player station
       }
+
     }
     //Manual Code // Default Position
     else
@@ -258,12 +307,16 @@ void Robot::Test() //This is test code using the xBox Controller (for some reaso
       }
       else
       {
+        //Manip.moveToCoordinates();
         //Go to default position
       }
+      //Moves wrist to parallel with the ground
+      Manip.moveToXDegreesBelowParallel(homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist, Straight_Up);
     }
   frc::SmartDashboard::PutBoolean("Manual Enabled", manualToggle);
   frc::SmartDashboard::PutBoolean("Ball Mode", ballToggle);
   frc::SmartDashboard::PutBoolean("Disc Mode", !ballToggle);
+  frc::Wait(0.005);
   }
 
 }

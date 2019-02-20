@@ -2,13 +2,12 @@
 #include "math.h"
 #include <iostream>
 
-//Pete's Roborio is Team Number 5150
 Blitz::Manipulator::Manipulator() :
-    Shoulder_Motor(3), //Placeholder ID
-    Elbow_Motor(10),    //Placeholder ID
-    Wrist_Motor(2), //Placeholder ID
+    Shoulder_Motor(4),
+    Elbow_Motor(5),    
+    Wrist_Motor(6), 
     LimitSwitch(0),
-    ClawTalon(4),
+    ClawTalon(7),
     PositionCounter(1)
 
 {
@@ -21,7 +20,7 @@ void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Mo
     {
         bool cancel1 = ((getDegrees(Shoulder_Axis, rawHome) >= MAX_RANGE_SHOULDER) && speed > 0);
         bool cancel2 = ((getDegrees(Shoulder_Axis, rawHome)) <= DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER && speed < 0);
-        if (!(cancel1 || cancel2))
+        if/* (!(cancel1 || cancel2)) */ (true)
         {
             Shoulder_Motor.Set(ControlMode::PercentOutput, speed); 
         }
@@ -36,7 +35,7 @@ void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Mo
     {
         bool cancel1 = ((getDegrees(Elbow_Axis, rawHome) >= MAX_RANGE_ELBOW) && speed > 0);
         bool cancel2 = ((getDegrees(Elbow_Axis, rawHome)) <= DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW && speed < 0);
-        if (!(cancel1 || cancel2))
+        if /*(!(cancel1 || cancel2))*/ (true)
         {
             Elbow_Motor.Set(ControlMode::PercentOutput, speed); 
         }
@@ -70,7 +69,7 @@ void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double ra
     currentDegrees = getDegrees(axisID, rawHome);
     if (axisID == Shoulder_Axis) //Prevents movement to unsafe areas
     {
-        double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03) + 1)) * .3) + .1;
+        double speed = (1 - (1 / (abs((degrees-currentDegrees) * 0.03) + 1)) * .3) + .1;
         if ((degrees - currentDegrees) > 1.5)
         {
             manipSet(speed, Shoulder_Axis, rawHome);
@@ -86,7 +85,7 @@ void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double ra
     }
     else if (axisID == Elbow_Axis)
     {
-        double speed = .25;//(1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1)) * .3) + .1;
+        double speed = (1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1)) * .3) + .1;
         if ((degrees - currentDegrees) > 1.5)
         {
             manipSet(speed, Elbow_Axis, rawHome);
@@ -194,6 +193,7 @@ void Blitz::Manipulator::moveToCoordinates(double x, double y, double rawHomeSho
         manipSetToDegrees(getAngleForCoordinates(x,y,Elbow_Axis), Elbow_Axis, rawHomeElbow);
     }  
 }
+
 bool Blitz::Manipulator::isPossible(double x, double y)
 {
     double angle1 = getAngleForCoordinates(x,y,Shoulder_Axis);
@@ -213,16 +213,14 @@ bool Blitz::Manipulator::isPossible(double x, double y)
     }
     return false;
 }
-double Blitz::Manipulator::getAngleForParallel(double x, double y)
-{
-    double angle1 = getAngleForCoordinates(x,y,0);
-    double angle2 = getAngleForCoordinates(x,y,1);
-    return (360 - angle1 - angle2 - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST);    
-}
 
-void Blitz::Manipulator::moveToParallel(double x, double y, double rawHomeWrist)
+
+//May need to be checked
+void Blitz::Manipulator::moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x)
 {
-    manipSetToDegrees(getAngleForParallel(x,y), Wrist_Axis, rawHomeWrist);
+    double degrees1 = getDegrees(Shoulder_Axis, rawHomeShoulder);
+    double degrees2 = getDegrees(Elbow_Axis, rawHomeElbow);
+    manipSetToDegrees(360 - degrees1 - degrees2 + x - DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST, Wrist_Axis, rawHomeWrist);
 }
 
 void Blitz::Manipulator::ResetPosition()
