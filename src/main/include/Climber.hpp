@@ -17,6 +17,6 @@ namespace Blitz
 
         private:
             frc::Compressor comp;
-            frc::Solenoid FrontUpSolenoid, FrontDownSolenoid, BackUpSolenoid, BackDownSolenoid;
+            frc::Solenoid FrontSolenoid, BackSolenoid;
     };
 }

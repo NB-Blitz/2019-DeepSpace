@@ -23,8 +23,8 @@ void Robot::RobotInit()
   MecanumDrive.Initialize(&MecanumInput);
   MecanumDrive.SetMotorDirection(0, -1);
   MecanumDrive.SetMotorDirection(1, -1);
-  MecanumDrive.SetMotorDirection(2, -1);
-  MecanumDrive.SetMotorDirection(3, -1);
+  MecanumDrive.SetMotorDirection(2, 1);
+  MecanumDrive.SetMotorDirection(3, 1);
 
 
   frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
@@ -111,8 +111,9 @@ void Robot::OperatorControl()
       AutoManager.DriveToBall(&MecanumInput);
     }
 
-    Climber.SetFrontSolenoid(Xbox.LeftBumper);
-    Climber.SetBackSolenoid(Xbox.RightBumper);
+
+    Climber.SetFrontSolenoid(Xbox.XButton);
+    Climber.SetBackSolenoid(Xbox.YButton);
 
     
     MecanumDrive.Run();
