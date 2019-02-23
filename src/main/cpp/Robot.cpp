@@ -12,7 +12,8 @@ Robot::Robot() :
   Xbox(0),
   LineTracker(),
   Ultrasonics(0, 1),
-  AutoManager()
+  AutoManager(),
+  Navx(SPI::Port::kMXP)
 {
 
 }
@@ -45,6 +46,7 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
+  Navx.Reset();
   while (IsOperatorControl() && IsEnabled()) 
   {
     Xbox.update();
@@ -54,6 +56,10 @@ void Robot::OperatorControl()
     double XInput = -Xbox.LeftX;
     double YInput = Xbox.LeftY;
     double ZInput = -Xbox.RightX;
+
+    Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
+    XInput = FieldStuff.XValue;
+    YInput = FieldStuff.YValue;
 
     if (Xbox.RightStickButton)
     {
@@ -132,6 +138,7 @@ void Robot::OperatorControl()
     frc::Wait(0.005);
   }
 }
+
 
 void Robot::Test() 
 {
