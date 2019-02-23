@@ -3,8 +3,11 @@
 #include <frc/WPILib.h>
 #include <BlitzLib/BlitzLib.hpp>
 #include <ctre/Phoenix.h>
+#include <Math.h>
 #include "AHRS.h"
 
+#include "Autonomous.hpp"
+#include "Manipulator.hpp"
 
 class Robot : public frc::SampleRobot 
 {
@@ -26,4 +29,8 @@ class Robot : public frc::SampleRobot
         Blitz::Mecanum MecanumDrive;
         Blitz::Joysticks::XboxController Xbox;
         Blitz::FieldOrientedControl FieldControl;
+        Blitz::Autonomous AutoManager;
+        Blitz::Ultrasonic Ultrasonics;
+        Blitz::LineTrack LineTracker;
+        Blitz::Manipulator Manipulator;
 };

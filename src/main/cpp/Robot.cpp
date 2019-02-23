@@ -10,6 +10,9 @@ Robot::Robot() :
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
+  LineTracker(),
+  Ultrasonics(0, 1),
+  AutoManager(),
   Navx(SPI::Port::kMXP)
 {
 
@@ -18,6 +21,11 @@ Robot::Robot() :
 void Robot::RobotInit() 
 {
   MecanumDrive.Initialize(&MecanumInput);
+  MecanumDrive.SetMotorDirection(0, -1);
+  MecanumDrive.SetMotorDirection(1, -1);
+  MecanumDrive.SetMotorDirection(2, -1);
+  MecanumDrive.SetMotorDirection(3, -1);
+
 
   frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
   frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
@@ -28,7 +36,12 @@ void Robot::RobotInit()
 
 void Robot::Autonomous() 
 {
-  
+  while(IsAutonomous() && IsEnabled())
+  {
+    AutoManager.DriveToBall(&MecanumInput);
+
+    MecanumDrive.Run();
+  }
 }
 
 void Robot::OperatorControl() 
@@ -37,14 +50,27 @@ void Robot::OperatorControl()
   while (IsOperatorControl() && IsEnabled()) 
   {
     Xbox.update();
+    LineTracker.Update();
+	
 
-    double XInput = -Xbox.RightX;
-    double YInput = Xbox.RightY;
-    double ZInput = -Xbox.LeftX;
+    double XInput = -Xbox.LeftX;
+    double YInput = Xbox.LeftY;
+    double ZInput = -Xbox.RightX;
 
     Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
     XInput = FieldStuff.XValue;
     YInput = FieldStuff.YValue;
+
+    if (Xbox.RightStickButton)
+    {
+      XInput = LineTracker.GetDirections()[0];
+      YInput = LineTracker.GetDirections()[1];
+      ZInput = LineTracker.GetDirections()[2];
+    }
+    if (Ultrasonics.willCrash() && YInput > 0)
+    {
+      YInput = 0;
+    }
 
     if(fabs(XInput) < .1)
     {
@@ -82,6 +108,11 @@ void Robot::OperatorControl()
     {
       MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.LeftTrigger;
     }
+
+    if(Xbox.AButton)
+    {
+      AutoManager.DriveToBall(&MecanumInput);
+    }
     
     MecanumDrive.Run();
 
@@ -94,6 +125,15 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("BackLeftEncoder", -LeftBackMotor.GetSelectedSensorVelocity(0));
     frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
     frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
+
+    if(Xbox.RightBumper)
+    {
+      Manipulator.MoveManipulatorPosition(12);
+    }
+    else if(Xbox.LeftBumper)
+    {
+      Manipulator.ResetPosition();
+    }
 
     frc::Wait(0.005);
   }
@@ -149,4 +189,6 @@ void Robot::Test()
 
 #ifndef RUNNING_FRC_TESTS
 START_ROBOT_CLASS(Robot)
+//Robot.setWorking(true);
+//bool workNormally = true;
 #endif
