@@ -107,15 +107,6 @@ void Robot::OperatorControl()
       MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
     }
 
-    if(Xbox.LeftTrigger > .2)
-    {
-      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.LeftTrigger;
-    }
-    else if(Xbox.RightTrigger > .2)
-    {
-      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.LeftTrigger;
-    }
-
     if(Xbox.AButton)
     {
       AutoManager.DriveToBall(&MecanumInput);
