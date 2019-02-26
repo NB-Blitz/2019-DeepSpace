@@ -23,9 +23,13 @@ void Robot::RobotInit()
   MecanumDrive.Initialize(&MecanumInput);
   MecanumDrive.SetMotorDirection(0, -1);
   MecanumDrive.SetMotorDirection(1, -1);
-  MecanumDrive.SetMotorDirection(2, -1);
-  MecanumDrive.SetMotorDirection(3, -1);
+  MecanumDrive.SetMotorDirection(2, 1);
+  MecanumDrive.SetMotorDirection(3, 1);
 
+  LeftFrontMotor.ConfigOpenloopRamp(.4);
+  LeftBackMotor.ConfigOpenloopRamp(.4);
+  RightFrontMotor.ConfigOpenloopRamp(.4);
+  RightBackMotor.ConfigOpenloopRamp(.4);
 
   frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
   frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
@@ -57,9 +61,12 @@ void Robot::OperatorControl()
     double YInput = Xbox.LeftY;
     double ZInput = -Xbox.RightX;
 
-    Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
-    XInput = FieldStuff.XValue;
-    YInput = FieldStuff.YValue;
+    if(!Xbox.Xbox.GetRawButton(9))
+    {
+      Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
+      XInput = FieldStuff.XValue;
+      YInput = FieldStuff.YValue;
+    }
 
     if (Xbox.RightStickButton)
     {
