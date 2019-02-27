@@ -92,7 +92,6 @@ void Robot::OperatorControl()
       YInput = FieldStuff.YValue;
     }
 
-    if (Xbox.RightStickButton)
     axisShoulder = Xbox.LeftY;
     axisElbow = Xbox.RightY;
     axisWrist = Xbox.LeftX;
