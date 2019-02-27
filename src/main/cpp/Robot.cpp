@@ -1,10 +1,13 @@
 /*
-  2/23/19
-  Instructions for Use:
-  1) Update maxRange and minRange pseudo-constants (in Robot.h) to what the arm is truly capable of
-  2) Move each joint with a potentiometer to its lowest and highest possible points (as seen in step 1)
-  3) Update code so that it accounts for inverted motors/potentiometers
-  4) Press the "A" button on the Xbox controller, then record the values showm on the SmartDashboard
+  2/26/19
+  - Coefficients are good as far as I can tell
+  - Extraneous code temporarily removed (old code still saved in my system, so methods for the rest of the robot will be added later)
+  - Currently testing moving to an angular position, which will quickly be followed by movement to coordinates of interest
+
+  NOTE: Start in home position to guarantee accuracy with degrees
+  Shoulder: 320 (about 37 minutes on a clock)
+  Elbow: 40 
+  Wrist: 90
 */
 
 #include "Robot.h"
@@ -47,10 +50,20 @@ void Robot::OperatorControl()
     axisElbow = Xbox.RightY;
     axisWrist = Xbox.LeftX;
     
-    //Move joints
-    //Manip.manipSet(0.4*axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); //Gearbox is having issues
-    Manip.manipSet(0.4*axisElbow, Elbow_Axis, homeEncoderValueElbow);
-    Manip.manipSet(axisWrist, Wrist_Axis, homeEncoderValueWrist);
+    if (Xbox.AButton)
+    {
+      //Move all joints so that the arm sticks out horizontally
+      Manip.manipSetToDegrees(270, Shoulder_Axis, homeEncoderValueShoulder);
+      Manip.manipSetToDegrees(180, Elbow_Axis, homeEncoderValueElbow);
+      Manip.manipSetToDegrees(180, Wrist_Axis, homeEncoderValueWrist);
+    }
+    else
+    {
+      //Move joints manually
+      Manip.manipSet(SPEED_MULTIPLIER_SHOULDER * axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); //Gearbox is having issues
+      Manip.manipSet(SPEED_MULTIPLIER_ELBOW * axisElbow, Elbow_Axis, homeEncoderValueElbow);
+      Manip.manipSet(SPEED_MULTIPLIER_WRIST * axisWrist, Wrist_Axis, homeEncoderValueWrist);
+    }
     
     //Receive raw input from potentiometers
     rawShoulder = Manip.getRawUnits(Shoulder_Axis);
@@ -67,6 +80,7 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("Shoulder's Axis", axisShoulder);
     frc::SmartDashboard::PutNumber("Elbow's Axis", axisElbow);
     frc::SmartDashboard::PutNumber("Wrist's Axis", axisWrist);
+    frc::SmartDashboard::PutBoolean("IsHorizontal", Xbox.AButton);
     
     //Delay
     frc::Wait(0.005);

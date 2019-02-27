@@ -62,6 +62,7 @@ namespace Blitz
             const double MIN_RANGE_WRIST = 80; //True Zero = faces previous axis
             const double MAX_RANGE_WRIST = 270;
             const double HOME_POSITION_WRIST = 90;
+            
 
             TalonSRX Shoulder_Motor, Elbow_Motor, Wrist_Motor;
     };

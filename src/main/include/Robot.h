@@ -25,4 +25,9 @@ class Robot : public frc::SampleRobot
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
         double axisShoulder, axisElbow, axisWrist;
         double rawShoulder = 0, rawElbow = 0, rawWrist = 0;
+        const double SPEED_MULTIPLIER_SHOULDER = 0.4; //Maximum speed for shoulder
+        const double SPEED_MULTIPLIER_ELBOW = 0.2; //Maximum speed for elbow
+        const double SPEED_MULTIPLIER_WRIST = 1; //Maximum speed for wrist
+        
 };
+
