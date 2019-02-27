@@ -19,18 +19,7 @@ Robot::Robot() :
 
 void Robot::RobotInit() 
 {
-  MecanumDrive.Initialize(&MecanumInput);
-  MecanumDrive.SetMotorDirection(0, -1);
-  MecanumDrive.SetMotorDirection(1, -1);
-  MecanumDrive.SetMotorDirection(2, -1);
-  MecanumDrive.SetMotorDirection(3, -1);
-
-
-  frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
-  frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
-  frc::SmartDashboard::PutNumber("IGain", Blitz::DriveReference::MOTOR1_kI);
-  frc::SmartDashboard::PutNumber("DGain", Blitz::DriveReference::MOTOR1_kD);
-  frc::SmartDashboard::PutNumber("MotorNum", 1);
+  
 }
 
 void Robot::Autonomous() 
