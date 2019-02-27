@@ -13,12 +13,20 @@
 #include "Robot.h"
 
 Robot::Robot() :
+  LeftFrontMotor(0),
+  LeftBackMotor(1),
+  RightFrontMotor(2),
+  RightBackMotor(3),
+  Motors(&LeftFrontMotor, &LeftBackMotor, &RightFrontMotor, &RightBackMotor),
+  Logger(0),
+  MecanumInput(),
+  MecanumDrive(&Motors, &Logger),
   Xbox(0),
   LineTracker(),
   Ultrasonics(0, 1),
   AutoManager(),
-  Navx(SPI::Port::kMXP)
-  Manip()
+  Navx(SPI::Port::kMXP),
+  Manipulator()
 {
 
 }
@@ -45,16 +53,21 @@ void Robot::RobotInit()
 
 void Robot::Autonomous() 
 {
+  while(IsAutonomous() && IsEnabled())
+  {
+    AutoManager.DriveToBall(&MecanumInput);
 
+    MecanumDrive.Run();
+  }
 }
 
 void Robot::OperatorControl() 
 {
   Navx.Reset();
   //Get Home Values
-  homeEncoderValueShoulder = Manip.getRawUnits(Shoulder_Axis);
-  homeEncoderValueElbow = Manip.getRawUnits(Elbow_Axis);
-  homeEncoderValueWrist = Manip.getRawUnits(Wrist_Axis);   
+  homeEncoderValueShoulder = Manipulator.getRawUnits(Shoulder_Axis);
+  homeEncoderValueElbow = Manipulator.getRawUnits(Elbow_Axis);
+  homeEncoderValueWrist = Manipulator.getRawUnits(Wrist_Axis);   
   
   //Display Home Values on SmartDashboard
   frc::SmartDashboard::PutNumber("Home Encoder - Shoulder", homeEncoderValueShoulder);
@@ -87,16 +100,16 @@ void Robot::OperatorControl()
     if (Xbox.AButton)
     {
       //Move all joints so that the arm sticks out horizontally
-      Manip.manipSetToDegrees(270, Shoulder_Axis, homeEncoderValueShoulder);
-      Manip.manipSetToDegrees(180, Elbow_Axis, homeEncoderValueElbow);
-      Manip.manipSetToDegrees(180, Wrist_Axis, homeEncoderValueWrist);
+      Manipulator.manipSetToDegrees(270, Shoulder_Axis, homeEncoderValueShoulder);
+      Manipulator.manipSetToDegrees(180, Elbow_Axis, homeEncoderValueElbow);
+      Manipulator.manipSetToDegrees(180, Wrist_Axis, homeEncoderValueWrist);
     }
     else
     {
       //Move joints manually
-      Manip.manipSet(SPEED_MULTIPLIER_SHOULDER * axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); //Gearbox is having issues
-      Manip.manipSet(SPEED_MULTIPLIER_ELBOW * axisElbow, Elbow_Axis, homeEncoderValueElbow);
-      Manip.manipSet(SPEED_MULTIPLIER_WRIST * axisWrist, Wrist_Axis, homeEncoderValueWrist);
+      Manipulator.manipSet(SPEED_MULTIPLIER_SHOULDER * axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); //Gearbox is having issues
+      Manipulator.manipSet(SPEED_MULTIPLIER_ELBOW * axisElbow, Elbow_Axis, homeEncoderValueElbow);
+      Manipulator.manipSet(SPEED_MULTIPLIER_WRIST * axisWrist, Wrist_Axis, homeEncoderValueWrist);
     }
 
     if(fabs(XInput) < .1)
@@ -133,17 +146,17 @@ void Robot::OperatorControl()
     }
     
     //Receive raw input from potentiometers
-    rawShoulder = Manip.getRawUnits(Shoulder_Axis);
-    rawElbow = Manip.getRawUnits(Elbow_Axis);
-    rawWrist = Manip.getRawUnits(Wrist_Axis);
+    rawShoulder = Manipulator.getRawUnits(Shoulder_Axis);
+    rawElbow = Manipulator.getRawUnits(Elbow_Axis);
+    rawWrist = Manipulator.getRawUnits(Wrist_Axis);
 
     //Record remaining information to SmartDashboard
     frc::SmartDashboard::PutNumber("Shoulder Pot Raw Current", rawShoulder);
-    frc::SmartDashboard::PutNumber("Shoulder Pot Degrees", Manip.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
+    frc::SmartDashboard::PutNumber("Shoulder Pot Degrees", Manipulator.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
     frc::SmartDashboard::PutNumber("Elbow Pot Raw Current", rawElbow);
-    frc::SmartDashboard::PutNumber("Elbow Pot Degrees", Manip.getDegrees(Elbow_Axis, homeEncoderValueElbow));
+    frc::SmartDashboard::PutNumber("Elbow Pot Degrees", Manipulator.getDegrees(Elbow_Axis, homeEncoderValueElbow));
     frc::SmartDashboard::PutNumber("Wrist Pot Raw Current", rawWrist);
-    frc::SmartDashboard::PutNumber("Wrist Pot Degrees", Manip.getDegrees(Wrist_Axis, homeEncoderValueWrist));
+    frc::SmartDashboard::PutNumber("Wrist Pot Degrees", Manipulator.getDegrees(Wrist_Axis, homeEncoderValueWrist));
     frc::SmartDashboard::PutNumber("Shoulder's Axis", axisShoulder);
     frc::SmartDashboard::PutNumber("Elbow's Axis", axisElbow);
     frc::SmartDashboard::PutNumber("Wrist's Axis", axisWrist);

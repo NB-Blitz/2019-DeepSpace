@@ -4,13 +4,15 @@
 Blitz::Manipulator::Manipulator() :
     Shoulder_Motor(4),
     Elbow_Motor(5),    
-    Wrist_Motor(6)
-
+    Wrist_Motor(6),
+    LimitSwitch(0),
+    ClawTalon(7),
+    PositionCounter(1)
 {
 
 }
-//Main has opposite direction to secondary (in degrees)
-void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Moves Manipulator in accordance to the joystick without PID
+
+void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Moves Manipulator in accordance to the joystick 
 {
     if (axisID == Shoulder_Axis)
     {
@@ -59,7 +61,7 @@ void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Mo
     }
 }
 
-void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double rawHome)
+void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double rawHome) //Go to a set angular position
 {
     double currentDegrees;
     currentDegrees = getDegrees(axisID, rawHome);
@@ -140,7 +142,7 @@ double Blitz::Manipulator::getDegrees(int axisID, double rawHome) //Returns degr
     }   
 }
 
-void Blitz::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 degrees
+void Blitz::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 raw counts
 {
     if (axisID == Shoulder_Axis)
     {
@@ -190,7 +192,7 @@ void Blitz::Manipulator::moveToCoordinates(double x, double y, double rawHomeSho
     }  
 }
 
-bool Blitz::Manipulator::isPossible(double x, double y)
+bool Blitz::Manipulator::isPossible(double x, double y) //Returns whether the arm can physically and legally move to coordinates
 {
     double angle1 = getAngleForCoordinates(x,y,Shoulder_Axis);
     double angle2 = getAngleForCoordinates(x,y,Elbow_Axis);
@@ -206,11 +208,81 @@ bool Blitz::Manipulator::isPossible(double x, double y)
     return false;
 }
 
-
 //May need to be checked
-void Blitz::Manipulator::moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x)
+void Blitz::Manipulator::moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x) //Moves wrist to X degrees below parallel
 {
     double degrees1 = getDegrees(Shoulder_Axis, rawHomeShoulder);
     double degrees2 = getDegrees(Elbow_Axis, rawHomeElbow);
     manipSetToDegrees(360 - degrees1 - degrees2 + x - MIN_RANGE_WRIST, Wrist_Axis, rawHomeWrist);
+}
+
+
+void Blitz::Manipulator::ResetPosition()
+{
+    if(LimitSwitch.Get())
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, 1);
+    }
+    else
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, 0);
+        PositionCounter.Reset();
+        currentPosition = 0;
+    }
+}
+
+void Blitz::Manipulator::MoveManipulatorSpeed(double speed)
+{
+    ClawTalon.Set(ControlMode::PercentOutput, speed);
+
+    if(speed < 0)
+    {
+        currentPosition += PositionCounter.Get() * direction;
+        PositionCounter.Reset();
+
+        direction = -1;
+    }
+    else if(speed > .05)
+    {
+        currentPosition += PositionCounter.Get() * direction;
+        PositionCounter.Reset();
+
+        direction = 1;
+    }
+}
+
+void Blitz::Manipulator::MoveManipulatorPosition(double diameter)
+{
+    //diameter = 19.575 - diameter;
+
+
+    double angle = ((asin((((diameter/2) - 5.375)/4.25))*(180/3.1459))-90);
+
+    
+    cout << angle << endl;
+
+    int counts = angle * PULSES_PER_ANGLE_SMALL_GEAR;
+
+    //int counts = 30;
+
+    currentPosition += PositionCounter.Get() * direction;
+    PositionCounter.Reset();
+
+    direction = -1;
+
+    if(currentPosition > counts)
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, -.5);
+        direction = -1;
+    }
+    else if(currentPosition < counts)
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, .5);
+        direction = 1;
+    }
+    else 
+    {
+        ClawTalon.Set(ControlMode::PercentOutput, 0);
+    }
+    
 }

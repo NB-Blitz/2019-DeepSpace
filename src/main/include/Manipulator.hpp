@@ -9,8 +9,7 @@ enum armAxis
 };
 enum customSpeed
 {
-  Off = 0,
-  Max = 1
+  Off = 0
 };
 enum wristDegrees
 {
@@ -40,6 +39,12 @@ namespace Blitz
             void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
             bool isPossible(double x, double y);
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
+            void ResetPosition();
+            void MoveManipulatorSpeed(double speed);
+            void MoveManipulatorPosition(double diameter);
+
+            double currentPosition = 0;
+
 
         private:
 
@@ -62,8 +67,21 @@ namespace Blitz
             const double MIN_RANGE_WRIST = 80; //True Zero = faces previous axis
             const double MAX_RANGE_WRIST = 270;
             const double HOME_POSITION_WRIST = 90;
-            
 
-            TalonSRX Shoulder_Motor, Elbow_Motor, Wrist_Motor;
+            const double SMALL_GEAR_TEETH = 24;
+            const double LARGE_GEAR_TEETH = 57;
+            const double PULSES_PER_ROTATION = 180;
+
+            const double PULSES_PER_ANGLE_SMALL_GEAR = ((PULSES_PER_ROTATION/LARGE_GEAR_TEETH) * SMALL_GEAR_TEETH)/360;
+
+            int direction = 1;
+
+            frc::DigitalInput LimitSwitch;
+            frc::Counter PositionCounter;
+            
+            TalonSRX ClawTalon;
+            TalonSRX Shoulder_Motor; 
+            TalonSRX Elbow_Motor;
+            TalonSRX Wrist_Motor;
     };
 }

@@ -4,10 +4,8 @@
 #include <BlitzLib/BlitzLib.hpp>
 #include <ctre/Phoenix.h>
 #include <Manipulator.hpp>
-#include <Blitz_Joystick.hpp>
 #include <Math.h>
 #include "AHRS.h"
-
 #include "Autonomous.hpp"
 #include "Manipulator.hpp"
 
@@ -35,8 +33,7 @@ class Robot : public frc::SampleRobot
         Blitz::Ultrasonic Ultrasonics;
         Blitz::LineTrack LineTracker;
         Blitz::Manipulator Manipulator;
-        Blitz::Autonomous AutoManager;
-        Blitz::Manipulator Manip;
+        
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
         double axisShoulder, axisElbow, axisWrist;
         double rawShoulder = 0, rawElbow = 0, rawWrist = 0;
