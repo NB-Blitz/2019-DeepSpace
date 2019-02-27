@@ -19,17 +19,10 @@ class Robot : public frc::SampleRobot
         void Test() override;
 
     private:
-        TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
-
-        Blitz::BlitzLogger Logger;
-        Blitz::Models::DriveMotors Motors;
-        Blitz::Models::MecanumInput MecanumInput;
-        Blitz::Mecanum MecanumDrive;
         Blitz::Joysticks::XboxController Xbox;
-        Blitz::LineTrack LineTracker;
-        Blitz::Ultrasonic Ultrasonics;
         Blitz::Autonomous AutoManager;
         Blitz::Manipulator Manip;
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
-        double yAxisShoulder, yAxisElbow, yAxisWrist;
+        double axisShoulder, axisElbow, axisWrist;
+        double rawShoulder = 0, rawElbow = 0, rawWrist = 0;
 };

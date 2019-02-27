@@ -31,10 +31,6 @@ namespace Blitz
 
             Manipulator();
 
-            void ResetPosition();
-            void MoveManipulatorSpeed(double speed);
-            void MoveManipulatorPosition(double diameter);
-
             void manipSet(double speed, int axisID, double rawHome); //PercentageOutput (No PID)
             void manipSetToDegrees(double degrees, int axisID, double rawHome);
             double getRawUnits(int axisID);
@@ -45,40 +41,28 @@ namespace Blitz
             bool isPossible(double x, double y);
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
 
-            double currentPosition = 0;
-
         private:
-            
-            const double SMALL_GEAR_TEETH = 24;
-            const double LARGE_GEAR_TEETH = 57;
-            const double PULSES_PER_ROTATION = 180;
 
-            const double PULSES_PER_ANGLE_SMALL_GEAR = ((PULSES_PER_ROTATION/LARGE_GEAR_TEETH) * SMALL_GEAR_TEETH)/360;
-
+            //For Shoulder Axis
             const double LENGTH_SHOULDER = 25;
-            const double MAX_RANGE_SHOULDER = 270;
-            const double COUNTS_PER_QUARTER_SHOULDER = 80; //Placeholder
-            const double TO_DEGREES_SHOULDER = COUNTS_PER_QUARTER_SHOULDER / 90;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_SHOULDER = 90; //True Zero = faces ground
+            const double MIN_RANGE_SHOULDER = 200; //True Zero = faces ground
+            const double MAX_RANGE_SHOULDER = 370;
+            const double TO_DEGREES_SHOULDER = 0.4; //Placeholder
+            const double HOME_POSITION_SHOULDER = 320;
 
-            //For Secondary Axis
+            //For Elbow Axis
             const double LENGTH_ELBOW = 23;
-            const double MAX_RANGE_ELBOW = 270;
-            const double COUNTS_PER_QUARTER_ELBOW = 80; //Placeholder
-            const double TO_DEGREES_ELBOW = COUNTS_PER_QUARTER_ELBOW / 90;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_ELBOW = 90; //True Zero = faces previous axis
+            const double MIN_RANGE_ELBOW = 30; //True Zero = faces previous axis
+            const double MAX_RANGE_ELBOW = 180;
+            const double TO_DEGREES_ELBOW = 0.95; //Placeholder
+            const double HOME_POSITION_ELBOW = 40;
             
             //For Wrist Axis
-            const double MAX_RANGE_WRIST = 260;
-            const double COUNTS_PER_QUARTER_WRIST = 80; //for 90 degrees, this is how many counts I get
-            const double TO_DEGREES_WRIST = COUNTS_PER_QUARTER_WRIST / 90;
-            const double DEGREES_BETWEEN_LIMIT_AND_TRUE_ZERO_WRIST = 80; //True Zero = faces previous axis
+            const double TO_DEGREES_WRIST = 0.3; //Placeholder
+            const double MIN_RANGE_WRIST = 80; //True Zero = faces previous axis
+            const double MAX_RANGE_WRIST = 270;
+            const double HOME_POSITION_WRIST = 90;
 
-            int direction = 1;
-
-            frc::DigitalInput LimitSwitch;
-            frc::Counter PositionCounter;
-            TalonSRX ClawTalon;
             TalonSRX Shoulder_Motor, Elbow_Motor, Wrist_Motor;
     };
 }
