@@ -6,7 +6,10 @@
 #include <Manipulator.hpp>
 #include <Blitz_Joystick.hpp>
 #include <Math.h>
+#include "AHRS.h"
+
 #include "Autonomous.hpp"
+#include "Manipulator.hpp"
 
 class Robot : public frc::SampleRobot 
 {
@@ -19,7 +22,19 @@ class Robot : public frc::SampleRobot
         void Test() override;
 
     private:
+        TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
+        AHRS Navx;
+
+        Blitz::BlitzLogger Logger;
+        Blitz::Models::DriveMotors Motors;
+        Blitz::Models::MecanumInput MecanumInput;
+        Blitz::Mecanum MecanumDrive;
         Blitz::Joysticks::XboxController Xbox;
+        Blitz::FieldOrientedControl FieldControl;
+        Blitz::Autonomous AutoManager;
+        Blitz::Ultrasonic Ultrasonics;
+        Blitz::LineTrack LineTracker;
+        Blitz::Manipulator Manipulator;
         Blitz::Autonomous AutoManager;
         Blitz::Manipulator Manip;
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
