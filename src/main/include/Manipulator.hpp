@@ -32,6 +32,7 @@ namespace Blitz
 
             void manipSet(double speed, int axisID, double rawHome); //PercentageOutput (No PID)
             void manipSetToDegrees(double degrees, int axisID, double rawHome);
+            bool manipSetToHome();
             double getRawUnits(int axisID);
             double getDegrees(int axisID, double rawHome); //0 is Main, 1 is Secondary...
             void resetDegrees(int axisID); //See above
@@ -45,6 +46,9 @@ namespace Blitz
 
             double currentPosition = 0;
 
+            const double HOME_POSITION_SHOULDER = 367;
+            const double HOME_POSITION_ELBOW = 35;
+            const double HOME_POSITION_WRIST = 227;
 
         private:
 
@@ -52,21 +56,23 @@ namespace Blitz
             const double LENGTH_SHOULDER = 25;
             const double MIN_RANGE_SHOULDER = 200; //True Zero = faces ground
             const double MAX_RANGE_SHOULDER = 370;
-            const double TO_DEGREES_SHOULDER = 0.4; //Placeholder
-            const double HOME_POSITION_SHOULDER = 320;
-
+            const double TO_DEGREES_SHOULDER = 1.65; //Placeholder
+            
             //For Elbow Axis
             const double LENGTH_ELBOW = 23;
             const double MIN_RANGE_ELBOW = 30; //True Zero = faces previous axis
             const double MAX_RANGE_ELBOW = 180;
-            const double TO_DEGREES_ELBOW = 0.95; //Placeholder
-            const double HOME_POSITION_ELBOW = 40;
+            const double TO_DEGREES_ELBOW = 2.8; //Placeholder
+/*
+    367 Shoulder
+    35 Elbow
+    227 Wrist
+*/
             
             //For Wrist Axis
-            const double TO_DEGREES_WRIST = 0.3; //Placeholder
+            const double TO_DEGREES_WRIST = 1.72; //Placeholder
             const double MIN_RANGE_WRIST = 80; //True Zero = faces previous axis
             const double MAX_RANGE_WRIST = 270;
-            const double HOME_POSITION_WRIST = 90;
 
             const double SMALL_GEAR_TEETH = 24;
             const double LARGE_GEAR_TEETH = 57;
@@ -83,5 +89,7 @@ namespace Blitz
             TalonSRX Shoulder_Motor; 
             TalonSRX Elbow_Motor;
             TalonSRX Wrist_Motor;
+
+
     };
 }

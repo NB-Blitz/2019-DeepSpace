@@ -22,6 +22,7 @@ Robot::Robot() :
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
   Xbox(0),
+  Xbox2(1),
   LineTracker(),
   Ultrasonics(0, 1),
   AutoManager(),
@@ -65,6 +66,12 @@ void Robot::OperatorControl()
 {
   Navx.Reset();
   //Get Home Values
+  /*
+    As of 3/2/2019, these values are
+    447,
+    414,
+    and 394 respectively
+  */
   homeEncoderValueShoulder = Manipulator.getRawUnits(Shoulder_Axis);
   homeEncoderValueElbow = Manipulator.getRawUnits(Elbow_Axis);
   homeEncoderValueWrist = Manipulator.getRawUnits(Wrist_Axis);   
@@ -74,18 +81,24 @@ void Robot::OperatorControl()
   frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
   frc::SmartDashboard::PutNumber("Home Encoder - Wrist", homeEncoderValueWrist);
 
+  cout << "test1" << endl;
+
   while (IsOperatorControl() && IsEnabled()) 
   {
     //Receive Xbox input
     Xbox.update();
+    Xbox2.update();
     LineTracker.Update();
-	
 
-    double XInput = -Xbox.LeftX;
-    double YInput = Xbox.LeftY;
-    double ZInput = -Xbox.RightX;
+    double XInput = -Xbox2.LeftX;
+    double YInput = Xbox2.LeftY;
+    double ZInput = -Xbox2.RightX;
 
-    if(!Xbox.Xbox.GetRawButton(9))
+    frc::SmartDashboard::PutNumber("XInput", XInput);
+    frc::SmartDashboard::PutNumber("YInput", YInput);
+    frc::SmartDashboard::PutNumber("ZInput", ZInput);
+
+    if(!Xbox2.Xbox.GetRawButton(9))
     {
       Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
       XInput = FieldStuff.XValue;
@@ -96,17 +109,34 @@ void Robot::OperatorControl()
     axisElbow = Xbox.RightY;
     axisWrist = Xbox.LeftX;
     
-    if (Xbox.AButton)
+    /*
+      For getting hatch panels
+      Shoulder Raw: 442
+      Elbow Raw: 315
+      Wrist Raw: 325
+    */
+
+    if (Xbox.AButton) 
     {
-      //Move all joints so that the arm sticks out horizontally
-      Manipulator.manipSetToDegrees(270, Shoulder_Axis, homeEncoderValueShoulder);
-      Manipulator.manipSetToDegrees(180, Elbow_Axis, homeEncoderValueElbow);
+      //Move all joints so that the arm is just right angles
+      //Manipulator.manipSetToDegrees(270, Shoulder_Axis, homeEncoderValueShoulder);
+      //Manipulator.manipSetToDegrees(90, Elbow_Axis, homeEncoderValueElbow);
       Manipulator.manipSetToDegrees(180, Wrist_Axis, homeEncoderValueWrist);
+    }
+    else if (Xbox.BButton)
+    {
+      if (!Manipulator.manipSetToHome())
+      {
+        homeEncoderValueShoulder = Manipulator.getRawUnits(Shoulder_Axis);
+        homeEncoderValueElbow = Manipulator.getRawUnits(Elbow_Axis);
+        homeEncoderValueWrist = Manipulator.getRawUnits(Wrist_Axis); 
+      }
     }
     else
     {
+      
       //Move joints manually
-      Manipulator.manipSet(SPEED_MULTIPLIER_SHOULDER * axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); //Gearbox is having issues
+      Manipulator.manipSet(SPEED_MULTIPLIER_SHOULDER * axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); 
       Manipulator.manipSet(SPEED_MULTIPLIER_ELBOW * axisElbow, Elbow_Axis, homeEncoderValueElbow);
       Manipulator.manipSet(SPEED_MULTIPLIER_WRIST * axisWrist, Wrist_Axis, homeEncoderValueWrist);
     }
@@ -130,16 +160,16 @@ void Robot::OperatorControl()
     MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
     MecanumInput.ZValue = (ZInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
 
-    if(Xbox.LeftBumper)
+    if(Xbox2.LeftBumper)
     {
       MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
     }
-    else if(Xbox.RightBumper)
+    else if(Xbox2.RightBumper)
     {
       MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
     }
 
-    if(Xbox.AButton)
+    if(Xbox2.AButton)
     {
       AutoManager.DriveToBall(&MecanumInput);
     }
@@ -148,6 +178,8 @@ void Robot::OperatorControl()
     rawShoulder = Manipulator.getRawUnits(Shoulder_Axis);
     rawElbow = Manipulator.getRawUnits(Elbow_Axis);
     rawWrist = Manipulator.getRawUnits(Wrist_Axis);
+
+    MecanumDrive.Run();
 
     //Record remaining information to SmartDashboard
     frc::SmartDashboard::PutNumber("Shoulder Pot Raw Current", rawShoulder);
@@ -161,7 +193,6 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("Wrist's Axis", axisWrist);
     frc::SmartDashboard::PutBoolean("IsHorizontal", Xbox.AButton);
     
-    //Delay
     frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
     frc::SmartDashboard::PutNumber("BackLeftJoyStick", MecanumDrive.GetMotorOutput(2));
     frc::SmartDashboard::PutNumber("FrontRightJoyStick", MecanumDrive.GetMotorOutput(3));
@@ -172,13 +203,17 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
     frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
 
-    if(Xbox.RightBumper)
+    if(Xbox.RightTrigger > .1)
     {
-      Manipulator.MoveManipulatorPosition(12);
+      Manipulator.MoveManipulatorSpeed(Xbox.RightTrigger);
     }
-    else if(Xbox.LeftBumper)
+    else if(Xbox.LeftTrigger > .1)
     {
-      Manipulator.ResetPosition();
+      Manipulator.MoveManipulatorSpeed(-Xbox.LeftTrigger);
+    }
+    else
+    {
+      Manipulator.MoveManipulatorSpeed(0);
     }
 
     frc::Wait(0.005);
