@@ -132,6 +132,11 @@ void Robot::OperatorControl()
       Shoulder: 445
       Elbow: 296
       Wrist: 438
+
+      Ball Top position
+      Shoulder: 121
+      Elbow: 82
+      Wrist: 437
     */
     //Toggle between Ball and Disc
     if (Xbox.LeftStickButton && !isLeftStickDown)
@@ -152,8 +157,7 @@ void Robot::OperatorControl()
     {
       if (ballToggle)
       {
-        //Go to ball high position on ship
-        
+        //Manipulator.moveToRawCounts(121, 148, 437);
       }
       else
       {
@@ -254,11 +258,15 @@ void Robot::OperatorControl()
     double ZInput = -Xbox2.RightX;
 
     //Drive Modes
-    if(Xbox2.LeftStickButton) //Field Oriented Control (Normally Disabled)
+    if((Ultrasonics.willCrash() && YInput < 0) && !Xbox2.RightStickButton) //Ultrasonic stop code
     {
-      Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
-      XInput = FieldStuff.XValue;
-      YInput = FieldStuff.YValue;
+      YInput = 0;
+    }
+    else if(Xbox2.LeftStickButton) //Field Oriented Control (Normally Disabled)
+    {
+      Blitz::Models::MecanumInput FieldInput = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
+      XInput = FieldInput.XValue;
+      YInput = FieldInput.YValue;
     }
     else if(Xbox2.LeftBumper) //Left Strafe
     {
