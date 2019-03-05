@@ -530,6 +530,5 @@ void Blitz::Manipulator::InitializeArm()
 {
     Shoulder_Motor.ConfigOpenloopRamp(1);
     Elbow_Motor.ConfigOpenloopRamp(1);
-    Wrist_Motor.ConfigOpenloopRamp(1);
-
+    Wrist_Motor.ConfigOpenloopRamp(.3);
 }
