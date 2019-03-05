@@ -34,22 +34,24 @@ Robot::Robot() :
 
 void Robot::RobotInit() 
 {
+  Manipulator.InitializeArm();
+
+
   MecanumDrive.Initialize(&MecanumInput);
   MecanumDrive.SetMotorDirection(0, -1);
   MecanumDrive.SetMotorDirection(1, -1);
   MecanumDrive.SetMotorDirection(2, 1);
   MecanumDrive.SetMotorDirection(3, 1);
 
-  LeftFrontMotor.ConfigOpenloopRamp(.4);
-  LeftBackMotor.ConfigOpenloopRamp(.4);
-  RightFrontMotor.ConfigOpenloopRamp(.4);
-  RightBackMotor.ConfigOpenloopRamp(.4);
+  LeftFrontMotor.ConfigOpenloopRamp(DRIVETRAIN_RAMP_TIME);
+  LeftBackMotor.ConfigOpenloopRamp(DRIVETRAIN_RAMP_TIME);
+  RightFrontMotor.ConfigOpenloopRamp(DRIVETRAIN_RAMP_TIME);
+  RightBackMotor.ConfigOpenloopRamp(DRIVETRAIN_RAMP_TIME);
 
   frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
   frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
   frc::SmartDashboard::PutNumber("IGain", Blitz::DriveReference::MOTOR1_kI);
   frc::SmartDashboard::PutNumber("DGain", Blitz::DriveReference::MOTOR1_kD);
-  frc::SmartDashboard::PutNumber("MotorNum", 1);
 }
 
 void Robot::Autonomous() 
@@ -64,7 +66,6 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
-  Manipulator.InitializeArm();
 
   Navx.Reset();
   //Get Home Values
@@ -83,29 +84,12 @@ void Robot::OperatorControl()
   frc::SmartDashboard::PutNumber("Home Encoder - Elbow", homeEncoderValueElbow);
   frc::SmartDashboard::PutNumber("Home Encoder - Wrist", homeEncoderValueWrist);
 
-  cout << "test1" << endl;
-
   while (IsOperatorControl() && IsEnabled()) 
   {
     //Receive Xbox input
     Xbox.update();
     Xbox2.update();
     LineTracker.Update();
-
-    double XInput = -Xbox2.LeftX;
-    double YInput = Xbox2.LeftY;
-    double ZInput = -Xbox2.RightX;
-
-    frc::SmartDashboard::PutNumber("XInput", XInput);
-    frc::SmartDashboard::PutNumber("YInput", YInput);
-    frc::SmartDashboard::PutNumber("ZInput", ZInput);
-
-    if(!Xbox2.Xbox.GetRawButton(9))
-    {
-      Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
-      XInput = FieldStuff.XValue;
-      YInput = FieldStuff.YValue;
-    }
 
     axisShoulder = Xbox.LeftY;
     axisElbow = Xbox.RightY;
@@ -150,18 +134,18 @@ void Robot::OperatorControl()
       Wrist: 438
     */
     //Toggle between Ball and Disc
-    if (Xbox.Xbox.GetRawButton(7) && !isStartDown)
+    if (Xbox.LeftStickButton && !isLeftStickDown)
     {
       ballToggle = !ballToggle;
     }
-    isStartDown = Xbox.Xbox.GetRawButton(7);
+    isLeftStickDown = Xbox.LeftStickButton;
 
     //Toggle between allowed manual and disabled manual (fully automatic)
-    if (Xbox.Xbox.GetRawButton(6) && !isBackDown)
+    if (Xbox.RightStickButton && !isRightStickDown)
     { 
       manualToggle = !manualToggle;
     }
-    isBackDown = Xbox.Xbox.GetRawButton(6);
+    isRightStickDown = Xbox.RightStickButton;
 
     //Hard-coded positions
     if (Xbox.YButton)
@@ -233,7 +217,7 @@ void Robot::OperatorControl()
         Manipulator.moveToRawCounts(423,289,333);
       }
     }
-    //Manual Code // Default Position
+    //Manual Code/Default Position
     else
     {
       if (manualToggle)
@@ -248,36 +232,65 @@ void Robot::OperatorControl()
         //Go to default position
         Manipulator.manipSetToHome();
       }
+    }
 
+    //Move Claw
+    if(Xbox.RightTrigger > JOYSTICK_DEADBAND)
+    {
+      Manipulator.MoveManipulatorSpeed(Xbox.RightTrigger);
+    }
+    else if(Xbox.LeftTrigger > JOYSTICK_DEADBAND)
+    {
+      Manipulator.MoveManipulatorSpeed(-Xbox.LeftTrigger);
+    }
+    else
+    {
+      Manipulator.MoveManipulatorSpeed(0);
+    }
+    
+    //Driving Code
+    double XInput = -Xbox2.LeftX;
+    double YInput = Xbox2.LeftY;
+    double ZInput = -Xbox2.RightX;
 
-    if(fabs(XInput) < .1)
+    //Drive Modes
+    if(Xbox2.LeftStickButton) //Field Oriented Control (Normally Disabled)
+    {
+      Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
+      XInput = FieldStuff.XValue;
+      YInput = FieldStuff.YValue;
+    }
+    else if(Xbox2.LeftBumper) //Left Strafe
+    {
+      XInput = STRAFE_SPEED;
+    }
+    else if(Xbox2.RightBumper) //Right Strafe
+    {
+       XInput = -STRAFE_SPEED;
+    }
+
+    //Deadbands
+    if(fabs(XInput) < JOYSTICK_DEADBAND)
     {
       XInput = 0;
     }
 
-    if(fabs(YInput) < .1)
+    if(fabs(YInput) < JOYSTICK_DEADBAND)
     {
       YInput = 0;
     }
 
-    if(fabs(ZInput) < .1)
+    if(fabs(ZInput) < JOYSTICK_DEADBAND)
     {
       ZInput = 0;
     }
 
+    //Populating MecanumInput
     MecanumInput.XValue = (XInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
     MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
     MecanumInput.ZValue = (ZInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
 
-    if(Xbox2.LeftBumper)
-    {
-      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
-    }
-    else if(Xbox2.RightBumper)
-    {
-      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
-    }
-
+    //Runs BallTracking
     if(Xbox2.AButton)
     {
       AutoManager.DriveToBall(&MecanumInput);
@@ -312,21 +325,7 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
     frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
 
-    if(Xbox.RightTrigger > .1)
-    {
-      Manipulator.MoveManipulatorSpeed(Xbox.RightTrigger);
-    }
-    else if(Xbox.LeftTrigger > .1)
-    {
-      Manipulator.MoveManipulatorSpeed(-Xbox.LeftTrigger);
-    }
-    else
-    {
-      Manipulator.MoveManipulatorSpeed(0);
-    }
-
     frc::Wait(0.005);
-    }
   }
 }
 
@@ -339,8 +338,6 @@ void Robot::Test()
     double PGain = frc::SmartDashboard::GetNumber("PGain", 0.0);
     double IGain = frc::SmartDashboard::GetNumber("IGain", 0.0);
     double DGain = frc::SmartDashboard::GetNumber("DGain", 0.0);
-
-    int MotorNum = frc::SmartDashboard::GetNumber("MotorNum", 1);
 
     MecanumDrive.UsePID = !Xbox.LeftBumper;
 

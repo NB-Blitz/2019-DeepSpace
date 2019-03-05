@@ -43,7 +43,11 @@ class Robot : public frc::SampleRobot
         const double SPEED_MULTIPLIER_WRIST = 1; //Maximum speed for wrist
         bool ballToggle = true; //if true, then balls - if false, then discs
         bool manualToggle = false; //if true, then manual is allowed - if false, then manual is disabled
-        bool isStartDown = false;
-        bool isBackDown = false;
+        bool isLeftStickDown = false;
+        bool isRightStickDown = false;
+
+        const double DRIVETRAIN_RAMP_TIME = .4;
+        const double JOYSTICK_DEADBAND = .1;
+        const double STRAFE_SPEED = .75;
 };
 
