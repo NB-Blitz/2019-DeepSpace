@@ -8,6 +8,7 @@
 #include "AHRS.h"
 #include "Autonomous.hpp"
 #include "Manipulator.hpp"
+#include "Climber.hpp"
 
 class Robot : public frc::SampleRobot 
 {
@@ -30,9 +31,9 @@ class Robot : public frc::SampleRobot
         Blitz::Joysticks::XboxController Xbox;
         Blitz::Joysticks::XboxController Xbox2;
         Blitz::FieldOrientedControl FieldControl;
-        Blitz::Autonomous AutoManager;
-        Blitz::Ultrasonic Ultrasonics;
         Blitz::LineTrack LineTracker;
+        Blitz::Ultrasonic Ultrasonics;
+        Blitz::Autonomous AutoManager;
         Blitz::Manipulator Manipulator;
         
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
