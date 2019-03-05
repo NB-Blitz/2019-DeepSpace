@@ -12,11 +12,10 @@ namespace Blitz
             Climber();
 
             void StartCompressor();
-            void SetFrontSolenoid(bool Up);
             void SetBackSolenoid(bool Up);
 
         private:
             frc::Compressor comp;
-            frc::Solenoid FrontSolenoid, BackSolenoid;
+            frc::Solenoid BackSolenoid;
     };
 }

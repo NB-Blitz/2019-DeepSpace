@@ -33,6 +33,5 @@ class Robot : public frc::SampleRobot
         Blitz::LineTrack LineTracker;
         Blitz::Ultrasonic Ultrasonics;
         Blitz::Autonomous AutoManager;
-        Blitz::Climber Climber;
         Blitz::Manipulator Manipulator;
 };

@@ -13,8 +13,7 @@ Robot::Robot() :
   LineTracker(),
   Ultrasonics(0, 1),
   AutoManager(),
-  Navx(SPI::Port::kMXP),
-  Climber()
+  Navx(SPI::Port::kMXP)
 {
 
 }
@@ -51,104 +50,8 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
-  Navx.Reset();
-  Climber.StartCompressor();
-  
   while (IsOperatorControl() && IsEnabled()) 
   {
-    Xbox.update();
-    LineTracker.Update();
-	
-
-    double XInput = -Xbox.LeftX;
-    double YInput = Xbox.LeftY;
-    double ZInput = -Xbox.RightX;
-
-    if(!Xbox.Xbox.GetRawButton(9))
-    {
-      Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
-      XInput = FieldStuff.XValue;
-      YInput = FieldStuff.YValue;
-    }
-
-    if (Xbox.RightStickButton)
-    {
-      XInput = LineTracker.GetDirections()[0];
-      YInput = LineTracker.GetDirections()[1];
-      ZInput = LineTracker.GetDirections()[2];
-    }
-    if (Ultrasonics.willCrash() && YInput > 0)
-    {
-      YInput = 0;
-    }
-
-    if(fabs(XInput) < .1)
-    {
-      XInput = 0;
-    }
-
-    if(fabs(YInput) < .1)
-    {
-      YInput = 0;
-    }
-
-    if(fabs(ZInput) < .1)
-    {
-      ZInput = 0;
-    }
-
-    MecanumInput.XValue = (XInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
-    MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
-    MecanumInput.ZValue = (ZInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
-
-    if(Xbox.LeftBumper)
-    {
-      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
-    }
-    else if(Xbox.RightBumper)
-    {
-      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * .75;
-    }
-
-    if(Xbox.LeftTrigger > .2)
-    {
-      MecanumInput.XValue = Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.LeftTrigger;
-    }
-    else if(Xbox.RightTrigger > .2)
-    {
-      MecanumInput.XValue = -Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND * Xbox.RightTrigger;
-    }
-
-    if(Xbox.AButton)
-    {
-      AutoManager.DriveToBall(&MecanumInput);
-    }
-
-
-    Climber.SetFrontSolenoid(Xbox.XButton);
-    Climber.SetBackSolenoid(Xbox.YButton);
-
-    
-    MecanumDrive.Run();
-
-    frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
-    frc::SmartDashboard::PutNumber("BackLeftJoyStick", MecanumDrive.GetMotorOutput(2));
-    frc::SmartDashboard::PutNumber("FrontRightJoyStick", MecanumDrive.GetMotorOutput(3));
-    frc::SmartDashboard::PutNumber("BackRightJoyStick", MecanumDrive.GetMotorOutput(4));
-
-    frc::SmartDashboard::PutNumber("FrontLeftEncoder", -LeftFrontMotor.GetSelectedSensorVelocity(0));
-    frc::SmartDashboard::PutNumber("BackLeftEncoder", -LeftBackMotor.GetSelectedSensorVelocity(0));
-    frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
-    frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
-
-    if(Xbox.RightBumper)
-    {
-      Manipulator.MoveManipulatorPosition(12);
-    }
-    else if(Xbox.LeftBumper)
-    {
-      Manipulator.ResetPosition();
-    }
 
     frc::Wait(0.005);
   }

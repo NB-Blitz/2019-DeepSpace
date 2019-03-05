@@ -1,8 +1,7 @@
 #include "Climber.hpp"
 
 Blitz::Climber::Climber():
-    FrontSolenoid(0),
-    BackSolenoid(1),
+    BackSolenoid(0),
     comp(0)
 {
 
@@ -11,11 +10,6 @@ Blitz::Climber::Climber():
 void Blitz::Climber::StartCompressor()
 {
     comp.SetClosedLoopControl(true);
-}
-
-void Blitz::Climber::SetFrontSolenoid(bool Up)
-{
-    FrontSolenoid.Set(Up);
 }
 
 void Blitz::Climber::SetBackSolenoid(bool Up)
