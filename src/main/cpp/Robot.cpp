@@ -13,6 +13,7 @@ Robot::Robot() :
   LineTracker(),
   Ultrasonics(0, 1),
   AutoManager(),
+  Navx(SPI::Port::kMXP),
   Climber()
 {
 
@@ -26,6 +27,10 @@ void Robot::RobotInit()
   MecanumDrive.SetMotorDirection(2, 1);
   MecanumDrive.SetMotorDirection(3, 1);
 
+  LeftFrontMotor.ConfigOpenloopRamp(.4);
+  LeftBackMotor.ConfigOpenloopRamp(.4);
+  RightFrontMotor.ConfigOpenloopRamp(.4);
+  RightBackMotor.ConfigOpenloopRamp(.4);
 
   frc::SmartDashboard::PutNumber("FGain", Blitz::DriveReference::MOTOR1_kF);
   frc::SmartDashboard::PutNumber("PGain", Blitz::DriveReference::MOTOR1_kP);
@@ -46,6 +51,7 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
+  Navx.Reset();
   Climber.StartCompressor();
   
   while (IsOperatorControl() && IsEnabled()) 
@@ -57,6 +63,13 @@ void Robot::OperatorControl()
     double XInput = -Xbox.LeftX;
     double YInput = Xbox.LeftY;
     double ZInput = -Xbox.RightX;
+
+    if(!Xbox.Xbox.GetRawButton(9))
+    {
+      Blitz::Models::MecanumInput FieldStuff = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
+      XInput = FieldStuff.XValue;
+      YInput = FieldStuff.YValue;
+    }
 
     if (Xbox.RightStickButton)
     {
@@ -128,9 +141,19 @@ void Robot::OperatorControl()
     frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
     frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
 
+    if(Xbox.RightBumper)
+    {
+      Manipulator.MoveManipulatorPosition(12);
+    }
+    else if(Xbox.LeftBumper)
+    {
+      Manipulator.ResetPosition();
+    }
+
     frc::Wait(0.005);
   }
 }
+
 
 void Robot::Test() 
 {
