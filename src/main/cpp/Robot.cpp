@@ -64,6 +64,8 @@ void Robot::Autonomous()
 
 void Robot::OperatorControl() 
 {
+  Manipulator.InitializeArm();
+
   Navx.Reset();
   //Get Home Values
   /*
@@ -110,36 +112,143 @@ void Robot::OperatorControl()
     axisWrist = Xbox.LeftX;
     
     /*
-      For getting hatch panels
-      Shoulder Raw: 442
-      Elbow Raw: 315
-      Wrist Raw: 325
-    */
+      Home = Catching Balls 
 
-    if (Xbox.AButton) 
+      For getting ball on low rocket 
+      Shoulder Raw: 443
+      Elbow Raw: 360
+      Wrist Raw: 368
+
+      For getting ball on medium rocket
+      Shoulder Raw: 323
+      Elbow Raw: 307
+      Wrist Raw: 444
+
+      For getting ball on high rocket
+      Shoulder: 
+      Elbow: 
+      Wrist: 
+
+      For getting hatch panel on low rocket & Receiving Hatch Panels
+      Shoulder: 423
+      Elbow: 289
+      Wrist: 333
+
+      For getting hatch panel on medium rocket
+      Shoulder: 359
+      Elbow: 333
+      Wrist: 433
+
+      For getting hatch panel on high rocket
+      Shoulder: 
+      Elbow: 
+      Wrist: 
+
+      For getting balls stuck out of robot frame
+      Shoulder: 445
+      Elbow: 296
+      Wrist: 438
+    */
+    //Toggle between Ball and Disc
+    if (Xbox.Xbox.GetRawButton(7) && !isStartDown)
     {
-      //Move all joints so that the arm is just right angles
-      //Manipulator.manipSetToDegrees(270, Shoulder_Axis, homeEncoderValueShoulder);
-      //Manipulator.manipSetToDegrees(90, Elbow_Axis, homeEncoderValueElbow);
-      Manipulator.manipSetToDegrees(180, Wrist_Axis, homeEncoderValueWrist);
+      ballToggle = !ballToggle;
+    }
+    isStartDown = Xbox.Xbox.GetRawButton(7);
+
+    //Toggle between allowed manual and disabled manual (fully automatic)
+    if (Xbox.Xbox.GetRawButton(6) && !isBackDown)
+    { 
+      manualToggle = !manualToggle;
+    }
+    isBackDown = Xbox.Xbox.GetRawButton(6);
+
+    //Hard-coded positions
+    if (Xbox.YButton)
+    {
+      if (ballToggle)
+      {
+        //Go to ball high position on ship
+        
+      }
+      else
+      {
+        //Go to disc high position on ship
+      }
     }
     else if (Xbox.BButton)
     {
-      if (!Manipulator.manipSetToHome())
+      if (ballToggle)
       {
-        homeEncoderValueShoulder = Manipulator.getRawUnits(Shoulder_Axis);
-        homeEncoderValueElbow = Manipulator.getRawUnits(Elbow_Axis);
-        homeEncoderValueWrist = Manipulator.getRawUnits(Wrist_Axis); 
+        //Go to ball medium position on ship
+        Manipulator.moveToRawCounts(323, 307, 444);
+      }
+      else
+      {
+        //Go to disc medium position on ship
+        Manipulator.moveToRawCounts(359, 333, 433);
+      }
+    } 
+    else if (Xbox.AButton)
+    {
+      if (ballToggle)
+      {
+        //Go to ball low position on ship
+        Manipulator.moveToRawCounts(443, 360, 368);
+      }
+      else
+      {
+        //Go to disc low position on ship
+        Manipulator.moveToRawCounts(423,289,333);
+      }
+    } 
+    else if (Xbox.XButton)
+    {
+      if (ballToggle)
+      {
+        //Grab ball from the player station
+        Manipulator.manipSetToHome();
+      }
+      else
+      {
+        //Grab disc from the player station
+        Manipulator.moveToRawCounts(423,289,333);
       }
     }
+    else if (Xbox.LeftBumper)
+    {
+      //Grab ball from robot frame
+      Manipulator.moveToRawCounts(445,296,438);
+    } 
+    else if (Xbox.RightBumper)
+    {
+      if (ballToggle)
+      {
+        //Grab ball from the player station
+        Manipulator.manipSetToHome();
+      }
+      else
+      {
+        //Grab disc from the player station
+        Manipulator.moveToRawCounts(423,289,333);
+      }
+    }
+    //Manual Code // Default Position
     else
     {
-      
-      //Move joints manually
-      Manipulator.manipSet(SPEED_MULTIPLIER_SHOULDER * axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); 
-      Manipulator.manipSet(SPEED_MULTIPLIER_ELBOW * axisElbow, Elbow_Axis, homeEncoderValueElbow);
-      Manipulator.manipSet(SPEED_MULTIPLIER_WRIST * axisWrist, Wrist_Axis, homeEncoderValueWrist);
-    }
+      if (manualToggle)
+      {
+        //Move joints manually
+        Manipulator.manipSet(SPEED_MULTIPLIER_SHOULDER * axisShoulder, Shoulder_Axis, homeEncoderValueShoulder); 
+        Manipulator.manipSet(SPEED_MULTIPLIER_ELBOW * axisElbow, Elbow_Axis, homeEncoderValueElbow);
+        Manipulator.manipSet(SPEED_MULTIPLIER_WRIST * axisWrist, Wrist_Axis, homeEncoderValueWrist);
+      }
+      else
+      {
+        //Go to default position
+        Manipulator.manipSetToHome();
+      }
+
 
     if(fabs(XInput) < .1)
     {
@@ -217,6 +326,7 @@ void Robot::OperatorControl()
     }
 
     frc::Wait(0.005);
+    }
   }
 }
 

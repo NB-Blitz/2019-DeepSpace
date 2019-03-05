@@ -41,6 +41,9 @@ class Robot : public frc::SampleRobot
         const double SPEED_MULTIPLIER_SHOULDER = 0.4; //Maximum speed for shoulder
         const double SPEED_MULTIPLIER_ELBOW = 0.5; //Maximum speed for elbow
         const double SPEED_MULTIPLIER_WRIST = 1; //Maximum speed for wrist
-        
+        bool ballToggle = true; //if true, then balls - if false, then discs
+        bool manualToggle = false; //if true, then manual is allowed - if false, then manual is disabled
+        bool isStartDown = false;
+        bool isBackDown = false;
 };
 

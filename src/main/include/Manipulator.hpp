@@ -37,12 +37,15 @@ namespace Blitz
             double getDegrees(int axisID, double rawHome); //0 is Main, 1 is Secondary...
             void resetDegrees(int axisID); //See above
             double getAngleForCoordinates(double x, double y, int axisID); //used by next method
+            void moveToRawCounts(double rawShoulder, double rawElbow, double rawWrist);
+            void moveToAngles(double shoulderAngle, double elbowAngle, double wristAngle, double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist);
             void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
             bool isPossible(double x, double y);
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
             void ResetPosition();
             void MoveManipulatorSpeed(double speed);
             void MoveManipulatorPosition(double diameter);
+            void InitializeArm();
 
             double currentPosition = 0;
 
