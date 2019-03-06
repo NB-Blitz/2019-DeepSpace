@@ -167,7 +167,7 @@ bool Blitz::Manipulator::manipSetToHome()
         }
         else
         {
-            speed = -(1 - (1 / (abs((447 - currentRawShoulder) * 0.03)+ 1))) * .3 - .1;
+            speed = -(1 - (1 / (abs((447 - currentRawShoulder) * 0.03)+ 1))) * .6 - .1;
             if ((447 - currentRawShoulder) > 5)
             {  
                 Shoulder_Motor.Set(ControlMode::PercentOutput, speed);
@@ -187,7 +187,7 @@ bool Blitz::Manipulator::manipSetToHome()
     }
     else if (abs(currentRawElbow - 414) > 5)
     {
-        speed = -(1 - (1 / (abs((414 - currentRawElbow) * 0.03)+ 1))) * .5 - .1;
+        speed = -(1 - (1 / (abs((414 - currentRawElbow) * 0.03)+ 1))) * .7 - .1;
         if ((414 - currentRawElbow) > 5)
         {  
             Elbow_Motor.Set(ControlMode::PercentOutput, speed);

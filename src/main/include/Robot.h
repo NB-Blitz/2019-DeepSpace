@@ -35,6 +35,7 @@ class Robot : public frc::SampleRobot
         Blitz::Ultrasonic Ultrasonics;
         Blitz::Autonomous AutoManager;
         Blitz::Manipulator Manipulator;
+        Blitz::Climber climber;
         
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
         double axisShoulder, axisElbow, axisWrist;
@@ -46,8 +47,13 @@ class Robot : public frc::SampleRobot
         bool manualToggle = false; //if true, then manual is allowed - if false, then manual is disabled
         bool isLeftStickDown = false;
         bool isRightStickDown = false;
+        bool isTriggerPressed = false;
 
-        const double DRIVETRAIN_RAMP_TIME = .4;
+        int CurrentElbowPosition = 0;
+        int CurrentWristPosition = 0;
+        int CurrentShoulderPosition = 0;
+
+        const double DRIVETRAIN_RAMP_TIME = .3;
         const double JOYSTICK_DEADBAND = .1;
         const double STRAFE_SPEED = .75;
 };
