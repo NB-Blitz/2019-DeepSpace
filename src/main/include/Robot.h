@@ -20,6 +20,8 @@ class Robot : public frc::SampleRobot
         void OperatorControl() override;
         void Test() override;
 
+        void RunRobot();
+
     private:
         TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
         AHRS Navx;
@@ -48,6 +50,7 @@ class Robot : public frc::SampleRobot
         bool isLeftStickDown = false;
         bool isRightStickDown = false;
         bool isTriggerPressed = false;
+        bool inPosition = false;
 
         int CurrentElbowPosition = 0;
         int CurrentWristPosition = 0;

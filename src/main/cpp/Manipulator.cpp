@@ -18,7 +18,7 @@ void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Mo
     {
         bool cancel1 = ((getDegrees(Shoulder_Axis, rawHome) >= MAX_RANGE_SHOULDER) && speed > 0);
         bool cancel2 = ((getDegrees(Shoulder_Axis, rawHome) <= MIN_RANGE_SHOULDER) && speed < 0);
-        if(!(cancel1 || cancel2) && (abs(speed)) > 0.1)
+        if(/*!(cancel1 || cancel2) && */(abs(speed)) > 0.1)
         {   
             Shoulder_Motor.Set(ControlMode::PercentOutput, speed); 
         }
@@ -33,7 +33,7 @@ void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Mo
     {
         bool cancel1 = ((getDegrees(Elbow_Axis, rawHome) >= MAX_RANGE_ELBOW) && speed > 0);
         bool cancel2 = ((getDegrees(Elbow_Axis, rawHome) <= MIN_RANGE_ELBOW) && speed < 0);
-        if (!(cancel1 || cancel2) && (abs(speed)) > 0.1)
+        if (/*!(cancel1 || cancel2) && */(abs(speed)) > 0.1)
         {
             Elbow_Motor.Set(ControlMode::PercentOutput, speed); 
         }
@@ -48,7 +48,7 @@ void Blitz::Manipulator::manipSet(double speed, int axisID, double rawHome) //Mo
     {
         bool cancel1 = ((getDegrees(Wrist_Axis, rawHome) >= MAX_RANGE_WRIST) && speed > 0);
         bool cancel2 = ((getDegrees(Wrist_Axis, rawHome) <= MIN_RANGE_WRIST) && speed < 0);
-        if (!(cancel1 || cancel2) && (abs(speed)) > 0.1)
+        if (/*!(cancel1 || cancel2) && */(abs(speed)) > 0.1)
         {
             Wrist_Motor.Set(ControlMode::PercentOutput, speed); 
         }
@@ -344,7 +344,7 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
         {
             if (getRawUnits(Shoulder_Axis) > 320)
             {
-                speed = -(1 - (1 / (abs((rawShoulder - currentRawShoulder) * 0.03)+ 1))) * .4 - .2;
+                speed = -(1 - (1 / (abs((rawShoulder - currentRawShoulder) * 0.03)+ 1))) * .3 - .2;
             }
             else if(getRawUnits(Shoulder_Axis) < 150)
             {
@@ -356,11 +356,11 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
             }
             if ((rawShoulder - currentRawShoulder) > 5)
             {  
-                Shoulder_Motor.Set(ControlMode::PercentOutput, speed * 1.2);
+                Shoulder_Motor.Set(ControlMode::PercentOutput, speed * .7);
             }
             else if ((rawShoulder - currentRawShoulder) < -5)
             {
-                Shoulder_Motor.Set(ControlMode::PercentOutput, -speed);
+                Shoulder_Motor.Set(ControlMode::PercentOutput, -speed * .6);
             }
             else
             {
