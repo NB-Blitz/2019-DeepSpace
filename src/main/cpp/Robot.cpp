@@ -194,7 +194,7 @@ void Robot::RunRobot()
     } 
     else if (Xbox.AButton)
     {
-      inPosition = Manipulator.moveToRawCounts(423,289,333);
+      inPosition = Manipulator.moveToRawCounts(423,294,333);
     } 
     else if (Xbox.XButton)
     {
@@ -271,10 +271,6 @@ void Robot::RunRobot()
       YInput *= .5;
       ZInput *= .5;
     } 
-    else if((Ultrasonics.willCrash() && YInput < 0) && !Xbox2.RightStickButton) //Ultrasonic stop code
-    {
-      YInput = 0;
-    }
     else if(Xbox2.LeftStickButton) //Field Oriented Control (Normally Disabled)
     {
       Blitz::Models::MecanumInput FieldInput = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());

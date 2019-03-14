@@ -356,11 +356,11 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
             }
             if ((rawShoulder - currentRawShoulder) > 5)
             {  
-                Shoulder_Motor.Set(ControlMode::PercentOutput, speed * .7);
+                Shoulder_Motor.Set(ControlMode::PercentOutput, speed * 1);
             }
             else if ((rawShoulder - currentRawShoulder) < -5)
             {
-                Shoulder_Motor.Set(ControlMode::PercentOutput, -speed * .6);
+                Shoulder_Motor.Set(ControlMode::PercentOutput, -speed * .9);
             }
             else
             {
@@ -467,7 +467,7 @@ void Blitz::Manipulator::ResetPosition()
 {
     if(LimitSwitch.Get())
     {
-        ClawTalon.Set(ControlMode::PercentOutput, 1);
+        ClawTalon.Set(ControlMode::PercentOutput, .7);
     }
     else
     {

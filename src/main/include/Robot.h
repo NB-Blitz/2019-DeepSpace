@@ -56,7 +56,7 @@ class Robot : public frc::SampleRobot
         int CurrentWristPosition = 0;
         int CurrentShoulderPosition = 0;
 
-        const double DRIVETRAIN_RAMP_TIME = .3;
+        const double DRIVETRAIN_RAMP_TIME = .2;
         const double JOYSTICK_DEADBAND = .1;
         const double STRAFE_SPEED = .75;
 };
