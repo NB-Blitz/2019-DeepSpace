@@ -206,12 +206,12 @@ void Robot::OperatorControl()
     {
       if (ballToggle)
       {
-        //Grab ball from the player station
+        //Go to ball cargo ship position
         Manipulator.manipSetToHome();
       }
       else
       {
-        //Grab disc from the player station
+        //Go to panel cargo ship position
         Manipulator.moveToRawCounts(423,289,333);
       }
     }
