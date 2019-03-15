@@ -42,6 +42,8 @@ namespace Blitz
             void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
             bool isPossible(double x, double y);
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
+            double optimize(double desiredShoulder, double desiredElbow, int axisID);
+            double getSpeed(double minSpeed, double maxSpeed, double currentPosition, double desiredPosition, bool isReversed);
             void ResetPosition();
             void MoveManipulatorSpeed(double speed);
             void MoveManipulatorPosition(double diameter);
@@ -49,9 +51,9 @@ namespace Blitz
 
             double currentPosition = 0;
 
-            const double HOME_POSITION_SHOULDER = 367;
-            const double HOME_POSITION_ELBOW = 35;
-            const double HOME_POSITION_WRIST = 227;
+            const double HOME_POSITION_SHOULDER = 447;
+            const double HOME_POSITION_ELBOW = 414;
+            const double HOME_POSITION_WRIST = 394;
 
         private:
 
