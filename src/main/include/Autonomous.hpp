@@ -1,7 +1,7 @@
 #pragma once
 
 #include <frc/WPIlib.h> 
-#include <BlitzLib/BlitzLib.hpp>
+#include <blitzLib/BlitzLib.hpp>
 
 namespace Blitz
 {

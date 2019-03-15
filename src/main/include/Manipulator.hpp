@@ -20,7 +20,7 @@ enum wristDegrees
 
 #include "frc/WPILib.h"
 #include "ctre/Phoenix.h"
-#include <BlitzLib/BlitzLib.hpp>
+#include <blitzLib/BlitzLib.hpp>
 
 namespace Blitz
 {
