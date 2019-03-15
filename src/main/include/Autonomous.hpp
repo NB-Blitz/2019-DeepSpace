@@ -1,6 +1,6 @@
 #pragma once
 
-#include <frc/WPIlib.h> 
+#include <frc/WPILib.h> 
 #include <blitzLib/BlitzLib.hpp>
 
 namespace Blitz

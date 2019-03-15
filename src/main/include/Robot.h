@@ -4,7 +4,7 @@
 #include <blitzLib/BlitzLib.hpp>
 #include <ctre/Phoenix.h>
 #include <Manipulator.hpp>
-#include <Math.h>
+#include <math.h>
 #include "AHRS.h"
 #include "Autonomous.hpp"
 #include "Manipulator.hpp"
