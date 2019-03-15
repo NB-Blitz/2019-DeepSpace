@@ -8,6 +8,7 @@
 #include "AHRS.h"
 #include "Autonomous.hpp"
 #include "Manipulator.hpp"
+#include "Climber.hpp"
 
 class Robot : public frc::SampleRobot 
 {
@@ -18,6 +19,8 @@ class Robot : public frc::SampleRobot
         void Autonomous() override;
         void OperatorControl() override;
         void Test() override;
+
+        void RunRobot();
 
     private:
         TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
@@ -30,10 +33,11 @@ class Robot : public frc::SampleRobot
         Blitz::Joysticks::XboxController Xbox;
         Blitz::Joysticks::XboxController Xbox2;
         Blitz::FieldOrientedControl FieldControl;
-        Blitz::Autonomous AutoManager;
-        Blitz::Ultrasonic Ultrasonics;
         Blitz::LineTrack LineTracker;
+        Blitz::Ultrasonic Ultrasonics;
+        Blitz::Autonomous AutoManager;
         Blitz::Manipulator Manipulator;
+        Blitz::Climber climber;
         
         double homeEncoderValueShoulder, homeEncoderValueElbow, homeEncoderValueWrist;
         double axisShoulder, axisElbow, axisWrist;
@@ -43,7 +47,17 @@ class Robot : public frc::SampleRobot
         const double SPEED_MULTIPLIER_WRIST = 1; //Maximum speed for wrist
         bool ballToggle = true; //if true, then balls - if false, then discs
         bool manualToggle = false; //if true, then manual is allowed - if false, then manual is disabled
-        bool isStartDown = false;
-        bool isBackDown = false;
+        bool isLeftStickDown = false;
+        bool isRightStickDown = false;
+        bool isTriggerPressed = false;
+        bool inPosition = false;
+
+        int CurrentElbowPosition = 0;
+        int CurrentWristPosition = 0;
+        int CurrentShoulderPosition = 0;
+
+        const double DRIVETRAIN_RAMP_TIME = .2;
+        const double JOYSTICK_DEADBAND = .1;
+        const double STRAFE_SPEED = .75;
 };
 
