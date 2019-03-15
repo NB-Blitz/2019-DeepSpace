@@ -23,7 +23,7 @@ namespace Blitz
             AnalogInput ultrasonicB;
 
             // Distance for robot to stop
-            const int MIN_DISTANCE = 10; // Inches
+            const int MIN_DISTANCE = 1; // Inches
             const double MULTIPLIER = (double)(5.0 / 512.0);
     };
 }
