@@ -436,7 +436,7 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
             }
             else if ((rawShoulder - currentRawShoulder) < -5)
             {
-                Shoulder_Motor.Set(ControlMode::PercentOutput, -speed);
+                Shoulder_Motor.Set(ControlMode::PercentOutput, -speed * .9);
             }
             else
             {
