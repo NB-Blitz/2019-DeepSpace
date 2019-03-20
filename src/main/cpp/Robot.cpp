@@ -348,7 +348,52 @@ bool Robot::unStickManipulator(double CurrentShoulderPosition, double CurrentElb
   }
 }
 
-void Robot::Test(){}
+void Robot::Test()
+{
+  while(IsTest() && IsEnabled())
+  {
+    double FGain = frc::SmartDashboard::GetNumber("FGain", 0.0);
+    double PGain = frc::SmartDashboard::GetNumber("PGain", 0.0);
+    double IGain = frc::SmartDashboard::GetNumber("IGain", 0.0);
+    double DGain = frc::SmartDashboard::GetNumber("DGain", 0.0);
+
+    int MotorNum = frc::SmartDashboard::GetNumber("MotorNum", 1);
+
+    MecanumDrive.UsePID = !Xbox.LeftBumper;
+
+    MecanumDrive.TuneF(1, FGain);
+    MecanumDrive.TuneP(1, PGain);
+    MecanumDrive.TuneI(1, IGain);
+    MecanumDrive.TuneD(1, DGain);
+    
+    MecanumDrive.TuneF(2, FGain);
+    MecanumDrive.TuneP(2, PGain);
+    MecanumDrive.TuneI(2, IGain);
+    MecanumDrive.TuneD(2, DGain);
+
+    MecanumDrive.TuneF(3, FGain);
+    MecanumDrive.TuneP(3, PGain);
+    MecanumDrive.TuneI(3, IGain);
+    MecanumDrive.TuneD(3, DGain);
+    
+    MecanumDrive.TuneF(4, FGain);
+    MecanumDrive.TuneP(4, PGain);
+    MecanumDrive.TuneI(4, IGain);
+    MecanumDrive.TuneD(4, DGain);
+
+    frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
+    frc::SmartDashboard::PutNumber("BackLeftJoyStick", MecanumDrive.GetMotorOutput(2));
+    frc::SmartDashboard::PutNumber("FrontRightJoyStick", MecanumDrive.GetMotorOutput(3));
+    frc::SmartDashboard::PutNumber("BackRightJoyStick", MecanumDrive.GetMotorOutput(4));
+
+    frc::SmartDashboard::PutNumber("FrontLeftEncoder", -LeftFrontMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("BackLeftEncoder", -LeftBackMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("FrontRightEncoder", RightFrontMotor.GetSelectedSensorVelocity(0));
+    frc::SmartDashboard::PutNumber("BackRightEncoder", RightBackMotor.GetSelectedSensorVelocity(0));
+
+    frc::Wait(0.005);
+}
+}
 
 #ifndef RUNNING_FRC_TESTS
 START_ROBOT_CLASS(Robot)
