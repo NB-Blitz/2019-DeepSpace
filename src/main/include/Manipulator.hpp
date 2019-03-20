@@ -35,14 +35,13 @@ namespace Blitz
             bool manipSetToHome();
             double getRawUnits(int axisID);
             double getDegrees(int axisID, double rawHome); //0 is Main, 1 is Secondary...
-            void resetDegrees(int axisID); //See above
             double getAngleForCoordinates(double x, double y, int axisID); //used by next method
             bool moveToRawCounts(double rawShoulder, double rawElbow, double rawWrist);
             void moveToAngles(double shoulderAngle, double elbowAngle, double wristAngle, double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist);
             void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
             bool isPossible(double x, double y);
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
-            double optimize(double desiredShoulder, double desiredElbow, int axisID);
+            double optimizeAutomaticMovement(double desiredShoulder, double desiredElbow, int axisID);
             double getSpeed(double minSpeed, double maxSpeed, double currentPosition, double desiredPosition, bool isReversed);
             void ResetPosition();
             void MoveManipulatorSpeed(double speed);
@@ -51,9 +50,21 @@ namespace Blitz
 
             double currentPosition = 0;
 
-            const double HOME_POSITION_SHOULDER = 447;
-            const double HOME_POSITION_ELBOW = 414;
-            const double HOME_POSITION_WRIST = 394;
+            //Home Position - Raw Units
+            const double HOME_POSITION_SHOULDER_RAW = 447;
+            const double HOME_POSITION_ELBOW_RAW = 414;
+            const double HOME_POSITION_WRIST_RAW = 394;
+            const double UNIVERSAL_SAFE_POSITION_ELBOW_RAW = 318;
+
+            //Home Position - Degrees
+            const double HOME_POSITION_SHOULDER_DEGREES = 447;
+            const double HOME_POSITION_ELBOW_DEGREES = 414;
+            const double HOME_POSITION_WRIST_DEGREES = 394;
+            const double UNIVERSAL_SAFE_POSITION_ELBOW_DEGREES = 318;
+
+            //Resistance + Voltage of Potentiometers (assumed to be the same for each pot for now)
+            const double RESISTANCE1 = 3300;
+            const double MAXIMUM_FEEDBACK = 1024;
 
         private:
 
@@ -94,6 +105,8 @@ namespace Blitz
             TalonSRX Shoulder_Motor; 
             TalonSRX Elbow_Motor;
             TalonSRX Wrist_Motor;
+
+
 
 
     };

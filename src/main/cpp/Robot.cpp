@@ -1,13 +1,8 @@
 /*
-  2/26/19
-  - Coefficients are good as far as I can tell
-  - Extraneous code temporarily removed (old code still saved in my system, so methods for the rest of the robot will be added later)
-  - Currently testing moving to an angular position, which will quickly be followed by movement to coordinates of interest
-
-  NOTE: Start in home position to guarantee accuracy with degrees
-  Shoulder: 320 (about 37 minutes on a clock)
-  Elbow: 40 
-  Wrist: 90
+  3/19/19
+  This code has but does not utlize optimization code
+  This is meant to test the "unStickManipulator" code, nothing more
+  Everything else should be identical to the dev branch, besides some minor pretested housekeeping fixes
 */
 
 #include "Robot.h"
@@ -177,10 +172,6 @@ void Robot::RunRobot()
       CurrentWristPosition = Manipulator.getRawUnits(Wrist_Axis);
       CurrentShoulderPosition = Manipulator.getRawUnits(Shoulder_Axis);
     }
-    else if(Xbox.RightBumper)
-    {
-      inPosition = Manipulator.moveToRawCounts(CurrentShoulderPosition, CurrentElbowPosition - 10, CurrentWristPosition);
-    }
     //Hard-coded positions
     else if (Xbox.YButton)
     {
@@ -194,12 +185,12 @@ void Robot::RunRobot()
     } 
     else if (Xbox.AButton)
     {
-      inPosition = Manipulator.moveToRawCounts(423,294,333);
+      inPosition = Manipulator.moveToRawCounts(423,280,333);
     } 
     else if (Xbox.XButton)
     {
       //Go to ball low position on ship
-      inPosition = Manipulator.moveToRawCounts(443, 360, 368);
+      inPosition = Manipulator.moveToRawCounts(443, 356, 368);
     }
     else if (Xbox.LeftBumper)
     {
@@ -288,6 +279,8 @@ void Robot::RunRobot()
 
     climber.SetBackSolenoid(Xbox2.YButton);
 
+    
+  
     //Populating MecanumInput
     MecanumInput.XValue = (XInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
     MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
@@ -303,6 +296,12 @@ void Robot::RunRobot()
     rawShoulder = Manipulator.getRawUnits(Shoulder_Axis);
     rawElbow = Manipulator.getRawUnits(Elbow_Axis);
     rawWrist = Manipulator.getRawUnits(Wrist_Axis);
+
+    //Overrides drive and arm control to automatically back away from where the hatch panel was placed
+    if(Xbox.RightBumper)
+    {
+      inPosition = unStickManipulator(CurrentShoulderPosition, CurrentElbowPosition, CurrentWristPosition);
+    }
 
     MecanumDrive.Run();
 
@@ -331,10 +330,25 @@ void Robot::RunRobot()
 
 }
 
-void Robot::Test()
+bool Robot::unStickManipulator(double CurrentShoulderPosition, double CurrentElbowPosition, double CurrentWristPosition)
 {
-  
+  if (abs((CurrentElbowPosition - 10) - Manipulator.getRawUnits(Elbow_Axis)) > 5)
+  {
+    //Move Elbow down slightly
+    Manipulator.moveToRawCounts(CurrentShoulderPosition, CurrentElbowPosition - 10, CurrentWristPosition);
+    return false;
+  }
+  else
+  {
+    //Move backward slowly
+    MecanumInput.XValue = 0;
+    MecanumInput.YValue = -.15;
+    MecanumInput.ZValue = 0;
+    return true;
+  }
 }
+
+void Robot::Test(){}
 
 #ifndef RUNNING_FRC_TESTS
 START_ROBOT_CLASS(Robot)

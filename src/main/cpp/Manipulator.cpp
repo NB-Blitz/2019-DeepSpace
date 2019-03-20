@@ -68,6 +68,7 @@ void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double ra
     if (axisID == Shoulder_Axis) //Prevents movement to unsafe areas
     {
         double speed = -(1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1))) * .3 - .1;
+        //speed = getSpeed(.1, .4, currentDegrees, degrees, true);
         if ((degrees - currentDegrees) > 1.5)
         {  
             manipSet(speed * 1.5, Shoulder_Axis, rawHome);
@@ -84,6 +85,7 @@ void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double ra
     else if (axisID == Elbow_Axis)
     {
         double speed = (1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1))) * .3 + .1;
+        //speed = getSpeed(.1, .4, currentDegrees, degrees, false);
         if ((degrees - currentDegrees) > 1.5)
         {
             manipSet(speed, Elbow_Axis, rawHome);
@@ -100,6 +102,7 @@ void Blitz::Manipulator::manipSetToDegrees(double degrees, int axisID, double ra
     else if (axisID == Wrist_Axis)
     {
         double speed = -(1 - (1 / (abs((degrees-currentDegrees) * 0.03)+ 1))) * .7 - .3;
+        //speed = getSpeed(.3, 1, currentDegrees, degrees, true);
         if ((degrees - currentDegrees) > 1.5)
         {
             manipSet(speed, Wrist_Axis, rawHome);
@@ -128,16 +131,16 @@ bool Blitz::Manipulator::manipSetToHome()
     double currentRawWrist = getRawUnits(Wrist_Axis);
     double speed;
     bool shoulderInPlace = false, elbowInPlace = false, wristInPlace = false;
-    if (abs(currentRawShoulder - HOME_POSITION_SHOULDER) > 5)
+    if (abs(currentRawShoulder - HOME_POSITION_SHOULDER_RAW) > 5)
     {
-        if (abs(318 - getRawUnits(Elbow_Axis) > 20))
+        if (abs(UNIVERSAL_SAFE_POSITION_ELBOW_RAW - getRawUnits(Elbow_Axis) > 20))
         {
-            speed = (1 - (1 / (abs((318 - currentRawElbow) * 0.03)+ 1))) * .5 + .1;
-            if ((318 - currentRawElbow) > 20)
+            speed = getSpeed(.1, .6, currentRawElbow, UNIVERSAL_SAFE_POSITION_ELBOW_RAW, false);
+            if ((UNIVERSAL_SAFE_POSITION_ELBOW_RAW - currentRawElbow) > 20)
             {  
                 Elbow_Motor.Set(ControlMode::PercentOutput, -speed);
             }
-            else if ((318 - currentRawElbow) < -20)
+            else if ((UNIVERSAL_SAFE_POSITION_ELBOW_RAW - currentRawElbow) < -20)
             {
                 Elbow_Motor.Set(ControlMode::PercentOutput, speed);
             }
@@ -149,12 +152,12 @@ bool Blitz::Manipulator::manipSetToHome()
         }
         else
         {
-            speed = -(1 - (1 / (abs((447 - currentRawShoulder) * 0.03)+ 1))) * .6 - .1;
-            if ((447 - currentRawShoulder) > 5)
+            speed = getSpeed(.1, .7, currentRawShoulder, HOME_POSITION_SHOULDER_RAW, true);
+            if ((HOME_POSITION_SHOULDER_RAW - currentRawShoulder) > 5)
             {  
                 Shoulder_Motor.Set(ControlMode::PercentOutput, speed);
             }
-            else if ((HOME_POSITION_SHOULDER - currentRawShoulder) < -5)
+            else if ((HOME_POSITION_SHOULDER_RAW - currentRawShoulder) < -5)
             {
                 Shoulder_Motor.Set(ControlMode::PercentOutput, -speed);
             }
@@ -166,14 +169,14 @@ bool Blitz::Manipulator::manipSetToHome()
             Elbow_Motor.Set(ControlMode::PercentOutput, Off);
         }
     }
-    else if (abs(currentRawElbow - HOME_POSITION_ELBOW) > 5)
+    else if (abs(currentRawElbow - HOME_POSITION_ELBOW_RAW) > 5)
     {
-        speed = -(1 - (1 / (abs((414 - currentRawElbow) * 0.03)+ 1))) * .7 - .1;
-        if ((414 - currentRawElbow) > 5)
+        speed = getSpeed(.1, .8, currentRawElbow, HOME_POSITION_ELBOW_RAW, true);
+        if ((HOME_POSITION_ELBOW_RAW - currentRawElbow) > 5)
         {  
             Elbow_Motor.Set(ControlMode::PercentOutput, speed);
         }
-        else if ((HOME_POSITION_ELBOW - currentRawElbow) < -5)
+        else if ((HOME_POSITION_ELBOW_RAW - currentRawElbow) < -5)
         {
             Elbow_Motor.Set(ControlMode::PercentOutput, -speed);
         }
@@ -193,14 +196,14 @@ bool Blitz::Manipulator::manipSetToHome()
         elbowInPlace = true;
     }
 
-    if (abs(currentRawWrist - HOME_POSITION_WRIST) > 5)
+    if (abs(currentRawWrist - HOME_POSITION_WRIST_RAW) > 5)
     {
-        speed = -(1 - (1 / (abs((HOME_POSITION_WRIST - currentRawWrist) * 0.03)+ 1))) * .7 - .3;
-        if ((HOME_POSITION_WRIST - currentRawWrist) > 5)
+        speed = getSpeed(.3, 1, currentRawWrist, HOME_POSITION_WRIST_RAW, true);
+        if ((HOME_POSITION_WRIST_RAW - currentRawWrist) > 5)
         {  
             Wrist_Motor.Set(ControlMode::PercentOutput, speed);
         }
-        else if ((HOME_POSITION_WRIST - currentRawWrist) < -5)
+        else if ((HOME_POSITION_WRIST_RAW - currentRawWrist) < -5)
         {
             Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
         }
@@ -241,42 +244,34 @@ double Blitz::Manipulator::getRawUnits(int axisID)
 
 double Blitz::Manipulator::getDegrees(int axisID, double rawHome) //Returns degrees from an encoder converting from raw counts
 {
+    /*
+        Example for Shoulder_Axis
+
+        double resistance = (RESISTANCE1 * getRawUnits(Shoulder_Axis)) / (MAXIMUM_FEEDBACK - getRawUnits(Shoulder_Axis));
+        double resistanceHome = (RESISTANCE1 * rawHome) / (MAXIMUM_FEEDBACK - rawHome);
+        double degrees = (resistance - resistanceHome) / TO_DEGREES_SHOULDER;
+        return abs(HOME_POSITION_SHOULDER_DEGREES + degrees);
+
+    */
     if (axisID == Shoulder_Axis)
     {
         double degrees = (getRawUnits(Shoulder_Axis) - rawHome) / TO_DEGREES_SHOULDER;
-        return abs(HOME_POSITION_SHOULDER + degrees); //-180 is offset   
+        return abs(HOME_POSITION_SHOULDER_RAW + degrees); //-180 is offset   
     }
     else if (axisID == Elbow_Axis) //Needs changing
     {
         double degrees = (rawHome - getRawUnits(Elbow_Axis)) / TO_DEGREES_ELBOW;
-        return abs(fmod(HOME_POSITION_ELBOW + degrees, 360));   
+        return abs(fmod(HOME_POSITION_ELBOW_RAW + degrees, 360));   
     }
     else if (axisID == Wrist_Axis) //Up = Increase in count
     {
         double degrees = (getRawUnits(Wrist_Axis) - rawHome) / TO_DEGREES_WRIST;
-        return abs(fmod(HOME_POSITION_WRIST + degrees, 360));   
+        return abs(fmod(HOME_POSITION_WRIST_RAW + degrees, 360));   
     }
     else
     {
         return 0;
     }   
-}
-
-void Blitz::Manipulator::resetDegrees(int axisID) //Resets the encoder to 0 raw counts
-{
-    if (axisID == Shoulder_Axis)
-    {
-        Shoulder_Motor.SetSelectedSensorPosition(0, 0, 0);
-    }
-    else if (axisID == Elbow_Axis)
-    {
-        Elbow_Motor.SetSelectedSensorPosition(0, 0, 0);
-    }
-    
-    else if (axisID == Wrist_Axis)
-    {
-        Wrist_Motor.SetSelectedSensorPosition(0, 0, 0);
-    }  
 }
 
 //Angles are relative to true zero degrees (second axis 0 degrees means it moves in opposite direction of main axis)
@@ -309,35 +304,108 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
     double currentRawElbow = getRawUnits(Elbow_Axis);
     double currentRawWrist = getRawUnits(Wrist_Axis);
     double speed;
-    //Possibly include booleans to show the status of the different joints
-    if (abs(currentRawShoulder - rawShoulder) > 5)
-    {
-        speed = -(1 - (1 / (abs((rawWrist - currentRawWrist) * 0.03)+ 1))) * .7 - .3;
-        if ((rawWrist - currentRawWrist) > 5)
-        {  
-            Wrist_Motor.Set(ControlMode::PercentOutput, speed);
-        }
-        else if ((rawWrist - currentRawWrist) < -5)
+
+    /*
+    bool shoulderInCorrectPlace = abs(currentRawShoulder - rawShoulder) < 5;
+    bool shoulderInSafePlace = abs(currentRawShoulder - optimizeAutomaticMovement(rawShoulder, rawElbow, Shoulder_Axis)) < 5;
+    bool elbowInCorrectPlace = abs(currentRawElbow - rawElbow) < 5; 
+    bool elbowInSafePlace = abs(currentRawElbow - optimizeAutomaticMovement(rawShoulder, rawElbow, Elbow_Axis)) < 5;
+    bool wristInCorrectPlace = abs(currentRawWrist - rawWrist) < 5; 
+    */
+   
+    bool shoulderInPlace = false, elbowInPlace = false, wristInPlace = false;
+    
+    /*
+        if (!wristInPlace)
         {
-            Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
-        }
-        else
+            speed = getSpeed(.3, 1, currentRawWrist, rawWrist, false);
+            if ((rawWrist - currentRawWrist) > 5)
+            {  
+                Wrist_Motor.Set(ControlMode::PercentOutput, speed);
+            }
+            else if ((rawWrist - currentRawWrist) < -5)
+            {
+                Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
+            }
+            else
+            {
+                Wrist_Motor.Set(ControlMode::PercentOutput, Off);
+                wristInPlace = true; 
+            }
+        }  
+        if (!elbowInSafePlace && !shoulderInSafePlace)
         {
-            Wrist_Motor.Set(ControlMode::PercentOutput, Off);
-        }
-        Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
-        Elbow_Motor.Set(ControlMode::PercentOutput, Off);
-    }
-    else if (abs(currentRawShoulder - rawShoulder) > 5)
-    {
-        if (abs(318 - getRawUnits(Elbow_Axis)) > 20 && currentRawShoulder > 150)
-        {
-            speed = (1 - (1 / (abs((318 - currentRawElbow) * 0.03)+ 1))) * .4 + .3;
-            if ((318 - currentRawElbow) > 20)
+            speed = getSpeed(.1, .6, currentRawElbow, UNIVERSAL_SAFE_POSITION_ELBOW_RAW, false);
+            if ((UNIVERSAL_SAFE_POSITION_ELBOW_RAW - currentRawElbow) > 20)
             {  
                 Elbow_Motor.Set(ControlMode::PercentOutput, -speed);
             }
-            else if ((318 - currentRawElbow) < -20)
+            else if ((UNIVERSAL_SAFE_POSITION_ELBOW_RAW - currentRawElbow) < -20)
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, speed);
+            }
+            else
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, Off);
+            }
+            Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
+        }  
+        else if (elbowInSafePlace && !shoulderInSafePlace)
+        {
+            speed = getSpeed(.1, .7, currentRawShoulder, rawShoulder, true);
+            if ((rawShoulder - currentRawShoulder) > 5)
+            {  
+                Shoulder_Motor.Set(ControlMode::PercentOutput, speed);
+            }
+            else if ((rawShoulder - currentRawShoulder) < -5)
+            {
+                Shoulder_Motor.Set(ControlMode::PercentOutput, -speed);
+            }
+            else
+            {
+                Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
+                shoulderInPlace = true;
+            }
+            Elbow_Motor.Set(ControlMode::PercentOutput, Off);
+        }
+        else if (shoulderInSafePlace && !elbowInSafePlace)
+        {
+            speed = getSpeed(.1, .8, currentRawElbow, rawElbow, true);
+            if ((rawElbow - currentRawElbow) > 5)
+            {  
+                Elbow_Motor.Set(ControlMode::PercentOutput, speed);
+            }
+            else if ((rawElbow- currentRawElbow) < -5)
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, -speed);
+            }
+            else
+            {
+                Elbow_Motor.Set(ControlMode::PercentOutput, Off);
+                elbowInPlace = true;
+            }
+            Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
+        }
+        else
+        {
+            Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
+            Elbow_Motor.Set(ControlMode::PercentOutput, Off);
+        }
+
+        return (wristInCorrectPlace && elbowInCorrectPlace && shoulderInCorrectPlace);
+
+    */
+    
+    if (abs(currentRawShoulder - rawShoulder) > 5)
+    {
+        if (abs(UNIVERSAL_SAFE_POSITION_ELBOW_RAW - getRawUnits(Elbow_Axis)) > 20)
+        {
+           speed = getSpeed(.1, .6, currentRawElbow, UNIVERSAL_SAFE_POSITION_ELBOW_RAW, false);
+            if ((UNIVERSAL_SAFE_POSITION_ELBOW_RAW - currentRawElbow) > 20)
+            {  
+                Elbow_Motor.Set(ControlMode::PercentOutput, -speed);
+            }
+            else if ((UNIVERSAL_SAFE_POSITION_ELBOW_RAW - currentRawElbow) < -20)
             {
                 Elbow_Motor.Set(ControlMode::PercentOutput, speed);
             }
@@ -351,19 +419,20 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
         {
             if (getRawUnits(Shoulder_Axis) > 320)
             {
-                speed = -(1 - (1 / (abs((rawShoulder - currentRawShoulder) * 0.03)+ 1))) * .3 - .2;
+                speed = getSpeed(.16, .4, currentRawShoulder, rawShoulder, true);
             }
-            else if(getRawUnits(Shoulder_Axis) < 150)
+            else if (getRawUnits(Shoulder_Axis < 150))
             {
-                speed = -(1 - (1 / (abs((rawShoulder - currentRawShoulder) * 0.03)+ 1))) * .6 - .1;
+                speed = getSpeed(.1, .56, currentRawShoulder, rawShoulder, true);
             }
             else
             {
-                speed = -(1 - (1 / (abs((rawShoulder - currentRawShoulder) * 0.03)+ 1))) * .4 - .1;
+                speed = getSpeed(.1, .4, currentRawShoulder, rawShoulder, true);
             }
+            
             if ((rawShoulder - currentRawShoulder) > 5)
             {  
-                Shoulder_Motor.Set(ControlMode::PercentOutput, speed * 1);
+                Shoulder_Motor.Set(ControlMode::PercentOutput, speed);
             }
             else if ((rawShoulder - currentRawShoulder) < -5)
             {
@@ -372,25 +441,26 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
             else
             {
                 Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
+                shoulderInPlace = true;
             }
             Elbow_Motor.Set(ControlMode::PercentOutput, Off);
         }
     }
-    //Need to figure out logic to link these 2 steps (whether elbow can begin moving before shoulder reaches destination) (figure out how to prevent disconnect with steps 2 and 4)
     else if (abs(currentRawElbow - rawElbow) > 5)
     {
-        speed = -(1 - (1 / (abs((rawElbow - currentRawElbow) * 0.03)+ 1))) * .3 - .1;
+        speed = getSpeed(.1, .8, currentRawElbow, rawElbow, true);
         if ((rawElbow - currentRawElbow) > 5)
         {  
             Elbow_Motor.Set(ControlMode::PercentOutput, speed);
         }
-        else if ((rawElbow - currentRawElbow) < -5)
+        else if ((rawElbow- currentRawElbow) < -5)
         {
             Elbow_Motor.Set(ControlMode::PercentOutput, -speed);
         }
         else
         {
             Elbow_Motor.Set(ControlMode::PercentOutput, Off);
+            elbowInPlace = true;
         }
         Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
     }
@@ -398,10 +468,34 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
     {
         Shoulder_Motor.Set(ControlMode::PercentOutput, Off);
         Elbow_Motor.Set(ControlMode::PercentOutput, Off);
-        Wrist_Motor.Set(ControlMode::PercentOutput, Off);
-        return true;
+        shoulderInPlace = true;
+        elbowInPlace = true;
     }
-    return false;
+
+    if (abs(currentRawWrist - rawWrist) > 5)
+    {
+        speed = getSpeed(.3, 1, currentRawWrist, rawWrist, false);
+        if ((rawWrist - currentRawWrist) > 5)
+        {  
+            Wrist_Motor.Set(ControlMode::PercentOutput, speed);
+        }
+        else if ((rawWrist - currentRawWrist) < -5)
+        {
+            Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
+        }
+        else
+        {
+            Wrist_Motor.Set(ControlMode::PercentOutput, Off);
+            wristInPlace = true; 
+        }
+    }
+    else
+    {
+        Wrist_Motor.Set(ControlMode::PercentOutput, Off);
+        wristInPlace = true;
+    }
+
+    return (wristInPlace && elbowInPlace && shoulderInPlace);
 }
 
 void Blitz::Manipulator::moveToAngles(double shoulderAngle, double elbowAngle, double wristAngle, double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist) //Moves both axes to the angles necessary to reach the given coordinates
@@ -460,15 +554,7 @@ bool Blitz::Manipulator::isPossible(double x, double y) //Returns whether the ar
     return false;
 }
 
-//May need to be checked
-void Blitz::Manipulator::moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x) //Moves wrist to X degrees below parallel
-{
-    double degrees1 = getDegrees(Shoulder_Axis, rawHomeShoulder);
-    double degrees2 = getDegrees(Elbow_Axis, rawHomeElbow);
-    manipSetToDegrees(360 - degrees1 - degrees2 + x - MIN_RANGE_WRIST, Wrist_Axis, rawHomeWrist);
-}
-
-double Blitz::Manipulator::optimize(double desiredShoulder, double desiredElbow, int axisID)
+double Blitz::Manipulator::optimizeAutomaticMovement(double desiredShoulder, double desiredElbow, int axisID)
 {
     double currentShoulder = getRawUnits(Shoulder_Axis); //Replace with Degrees if possible
     double currentElbow = getRawUnits(Elbow_Axis); //Replace with Degrees if possible
@@ -511,7 +597,7 @@ double Blitz::Manipulator::optimize(double desiredShoulder, double desiredElbow,
         }
         else
         {
-            return trueSafe2; //Likely 318 or about 75 degrees
+            return UNIVERSAL_SAFE_POSITION_ELBOW;
         }
     }
     */
