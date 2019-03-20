@@ -50,10 +50,21 @@ namespace Blitz
 
             double currentPosition = 0;
 
-            const double HOME_POSITION_SHOULDER = 447;
-            const double HOME_POSITION_ELBOW = 414;
-            const double HOME_POSITION_WRIST = 394;
-            const double UNIVERSAL_SAFE_POSITION_ELBOW = 318;
+            //Home Position - Raw Units
+            const double HOME_POSITION_SHOULDER_RAW = 447;
+            const double HOME_POSITION_ELBOW_RAW = 414;
+            const double HOME_POSITION_WRIST_RAW = 394;
+            const double UNIVERSAL_SAFE_POSITION_ELBOW_RAW = 318;
+
+            //Home Position - Degrees
+            const double HOME_POSITION_SHOULDER_DEGREES = 447;
+            const double HOME_POSITION_ELBOW_DEGREES = 414;
+            const double HOME_POSITION_WRIST_DEGREES = 394;
+            const double UNIVERSAL_SAFE_POSITION_ELBOW_DEGREES = 318;
+
+            //Resistance + Voltage of Potentiometers (assumed to be the same for each pot for now)
+            const double RESISTANCE1 = 3300;
+            const double MAXIMUM_FEEDBACK = 1024;
 
         private:
 
@@ -94,6 +105,8 @@ namespace Blitz
             TalonSRX Shoulder_Motor; 
             TalonSRX Elbow_Motor;
             TalonSRX Wrist_Motor;
+
+
 
 
     };

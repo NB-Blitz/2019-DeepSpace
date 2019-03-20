@@ -21,6 +21,7 @@ class Robot : public frc::SampleRobot
         void Test() override;
 
         void RunRobot();
+        bool unStickManipulator(double CurrentShoulderPosition, double CurrentElbowPosition, double CurrentWristPosition);
 
     private:
         TalonSRX LeftFrontMotor, LeftBackMotor, RightFrontMotor, RightBackMotor;
