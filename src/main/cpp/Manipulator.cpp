@@ -196,28 +196,28 @@ bool Blitz::Manipulator::manipSetToHome()
         elbowInPlace = true;
     }
 
-    if (abs(currentRawWrist - HOME_POSITION_WRIST_RAW) > 5)
-    {
-        speed = getSpeed(.3, 1, currentRawWrist, HOME_POSITION_WRIST_RAW, true);
-        if ((HOME_POSITION_WRIST_RAW - currentRawWrist) > 5)
-        {  
-            Wrist_Motor.Set(ControlMode::PercentOutput, speed);
-        }
-        else if ((HOME_POSITION_WRIST_RAW - currentRawWrist) < -5)
-        {
-            Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
-        }
-        else
-        {
-            Wrist_Motor.Set(ControlMode::PercentOutput, Off);
-            wristInPlace = true; 
-        }
-    }
-    else
-    {
-        Wrist_Motor.Set(ControlMode::PercentOutput, Off);
-        wristInPlace = true;
-    }
+    // if (abs(currentRawWrist - HOME_POSITION_WRIST_RAW) > 5)
+    // {
+    //     speed = getSpeed(.3, 1, currentRawWrist, HOME_POSITION_WRIST_RAW, true);
+    //     if ((HOME_POSITION_WRIST_RAW - currentRawWrist) > 5)
+    //     {  
+    //         Wrist_Motor.Set(ControlMode::PercentOutput, speed);
+    //     }
+    //     else if ((HOME_POSITION_WRIST_RAW - currentRawWrist) < -5)
+    //     {
+    //         Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
+    //     }
+    //     else
+    //     {
+    //         Wrist_Motor.Set(ControlMode::PercentOutput, Off);
+    //         wristInPlace = true; 
+    //     }
+    // }
+    // else
+    // {
+    //     Wrist_Motor.Set(ControlMode::PercentOutput, Off);
+    //     wristInPlace = true;
+    // }
 
     return (wristInPlace && elbowInPlace && shoulderInPlace);
 }
@@ -472,28 +472,28 @@ bool Blitz::Manipulator::moveToRawCounts(double rawShoulder, double rawElbow, do
         elbowInPlace = true;
     }
 
-    if (abs(currentRawWrist - rawWrist) > 5)
-    {
-        speed = getSpeed(.3, 1, currentRawWrist, rawWrist, false);
-        if ((rawWrist - currentRawWrist) > 5)
-        {  
-            Wrist_Motor.Set(ControlMode::PercentOutput, speed);
-        }
-        else if ((rawWrist - currentRawWrist) < -5)
-        {
-            Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
-        }
-        else
-        {
-            Wrist_Motor.Set(ControlMode::PercentOutput, Off);
-            wristInPlace = true; 
-        }
-    }
-    else
-    {
-        Wrist_Motor.Set(ControlMode::PercentOutput, Off);
-        wristInPlace = true;
-    }
+    // if (abs(currentRawWrist - rawWrist) > 5)
+    // {
+    //     speed = getSpeed(.3, 1, currentRawWrist, rawWrist, true);
+    //     if ((rawWrist - currentRawWrist) > 5)
+    //     {  
+    //         Wrist_Motor.Set(ControlMode::PercentOutput, speed);
+    //     }
+    //     else if ((rawWrist - currentRawWrist) < -5)
+    //     {
+    //         Wrist_Motor.Set(ControlMode::PercentOutput, -speed);
+    //     }
+    //     else
+    //     {
+    //         Wrist_Motor.Set(ControlMode::PercentOutput, Off);
+    //         wristInPlace = true; 
+    //     }
+    // }
+    // else
+    // {
+    //     Wrist_Motor.Set(ControlMode::PercentOutput, Off);
+    //     wristInPlace = true;
+    // }
 
     return (wristInPlace && elbowInPlace && shoulderInPlace);
 }
@@ -616,7 +616,7 @@ double Blitz::Manipulator::getSpeed(double minSpeed, double maxSpeed, double cur
     }
 }
 
-void Blitz::Manipulator::ResetPosition()
+bool Blitz::Manipulator::ResetPosition()
 {
     if(LimitSwitch.Get())
     {
@@ -628,6 +628,7 @@ void Blitz::Manipulator::ResetPosition()
         PositionCounter.Reset();
         currentPosition = 0;
     }
+    return LimitSwitch.Get();
 }
 
 void Blitz::Manipulator::MoveManipulatorSpeed(double speed)

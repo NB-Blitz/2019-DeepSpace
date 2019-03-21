@@ -43,7 +43,7 @@ namespace Blitz
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
             double optimizeAutomaticMovement(double desiredShoulder, double desiredElbow, int axisID);
             double getSpeed(double minSpeed, double maxSpeed, double currentPosition, double desiredPosition, bool isReversed);
-            void ResetPosition();
+            bool ResetPosition();
             void MoveManipulatorSpeed(double speed);
             void MoveManipulatorPosition(double diameter);
             void InitializeArm();
@@ -105,9 +105,5 @@ namespace Blitz
             TalonSRX Shoulder_Motor; 
             TalonSRX Elbow_Motor;
             TalonSRX Wrist_Motor;
-
-
-
-
     };
 }

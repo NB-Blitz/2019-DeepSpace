@@ -111,7 +111,7 @@ void Robot::RunRobot()
     LineTracker.Update();
 
     axisShoulder = Xbox.LeftY;
-    axisElbow = Xbox.RightY;
+    axisElbow = -Xbox.RightX;
     axisWrist = Xbox.LeftX;
     
     /*
@@ -166,7 +166,7 @@ void Robot::RunRobot()
     }
     isRightStickDown = Xbox.RightStickButton;
 
-    if(Xbox.RightBumper && !isTriggerPressed)
+    if(Xbox2.BButton && !isTriggerPressed)
     {
       CurrentElbowPosition = Manipulator.getRawUnits(Elbow_Axis);
       CurrentWristPosition = Manipulator.getRawUnits(Wrist_Axis);
@@ -213,7 +213,7 @@ void Robot::RunRobot()
         inPosition = Manipulator.manipSetToHome();
       }
     }
-    isTriggerPressed = Xbox.RightBumper;
+    isTriggerPressed = Xbox2.BButton;
 
     //Move Claw
     if(Xbox.RightTrigger > JOYSTICK_DEADBAND)
@@ -298,7 +298,7 @@ void Robot::RunRobot()
     rawWrist = Manipulator.getRawUnits(Wrist_Axis);
 
     //Overrides drive and arm control to automatically back away from where the hatch panel was placed
-    if(Xbox.RightBumper)
+    if(Xbox2.BButton)
     {
       inPosition = unStickManipulator(CurrentShoulderPosition, CurrentElbowPosition, CurrentWristPosition);
     }
@@ -306,6 +306,7 @@ void Robot::RunRobot()
     MecanumDrive.Run();
 
     //Record remaining information to SmartDashboard
+    frc::SmartDashboard::PutNumber("Elbow Start Position", CurrentElbowPosition);
     frc::SmartDashboard::PutNumber("Shoulder Pot Raw Current", rawShoulder);
     frc::SmartDashboard::PutNumber("Shoulder Pot Degrees", Manipulator.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
     frc::SmartDashboard::PutNumber("Elbow Pot Raw Current", rawElbow);
@@ -332,20 +333,17 @@ void Robot::RunRobot()
 
 bool Robot::unStickManipulator(double CurrentShoulderPosition, double CurrentElbowPosition, double CurrentWristPosition)
 {
-  if (abs((CurrentElbowPosition - 10) - Manipulator.getRawUnits(Elbow_Axis)) > 5)
-  {
-    //Move Elbow down slightly
-    Manipulator.moveToRawCounts(CurrentShoulderPosition, CurrentElbowPosition - 10, CurrentWristPosition);
-    return false;
-  }
-  else
+  Manipulator.ResetPosition();
+  if (Manipulator.moveToRawCounts(CurrentShoulderPosition, CurrentElbowPosition - 10, CurrentWristPosition))
   {
     //Move backward slowly
     MecanumInput.XValue = 0;
-    MecanumInput.YValue = -.15;
+    MecanumInput.YValue = .15 * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND;
     MecanumInput.ZValue = 0;
     return true;
   }
+
+  return false;
 }
 
 void Robot::Test()
@@ -360,6 +358,10 @@ void Robot::Test()
     int MotorNum = frc::SmartDashboard::GetNumber("MotorNum", 1);
 
     MecanumDrive.UsePID = !Xbox.LeftBumper;
+
+    Xbox.update();
+
+    MecanumInput.YValue = Xbox.LeftY;
 
     MecanumDrive.TuneF(1, FGain);
     MecanumDrive.TuneP(1, PGain);
@@ -380,6 +382,8 @@ void Robot::Test()
     MecanumDrive.TuneP(4, PGain);
     MecanumDrive.TuneI(4, IGain);
     MecanumDrive.TuneD(4, DGain);
+
+    MecanumDrive.Run();
 
     frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
     frc::SmartDashboard::PutNumber("BackLeftJoyStick", MecanumDrive.GetMotorOutput(2));
