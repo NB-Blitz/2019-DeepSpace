@@ -31,8 +31,8 @@ class Robot : public frc::SampleRobot
         Blitz::Models::DriveMotors Motors;
         Blitz::Models::MecanumInput MecanumInput;
         Blitz::Mecanum MecanumDrive;
-        Blitz::Joysticks::XboxController Xbox;
-        Blitz::Joysticks::XboxController Xbox2;
+        Blitz::Joysticks::XboxController ArmController;
+        Blitz::Joysticks::XboxController DriveController;
         Blitz::FieldOrientedControl FieldControl;
         Blitz::LineTrack LineTracker;
         Blitz::Ultrasonic Ultrasonics;

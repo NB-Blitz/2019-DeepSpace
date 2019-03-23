@@ -16,8 +16,8 @@ Robot::Robot() :
   Logger(0),
   MecanumInput(),
   MecanumDrive(&Motors, &Logger),
-  Xbox(0),
-  Xbox2(1),
+  ArmController(0),
+  DriveController(1),
   LineTracker(),
   Ultrasonics(0, 1),
   AutoManager(),
@@ -105,14 +105,14 @@ void Robot::OperatorControl()
 
 void Robot::RunRobot()
 {
-     //Receive Xbox input
-    Xbox.update();
-    Xbox2.update();
+    //Receive Xbox input
+    ArmController.update();
+    DriveController.update();
     LineTracker.Update();
 
-    axisShoulder = Xbox.LeftY;
-    axisElbow = -Xbox.RightX;
-    axisWrist = Xbox.LeftX;
+    axisShoulder = ArmController.LeftY;
+    axisElbow = -ArmController.RightX;
+    axisWrist = ArmController.LeftX;
     
     /*
       Home = Catching Balls 
@@ -127,11 +127,6 @@ void Robot::RunRobot()
       Elbow Raw: 307
       Wrist Raw: 444
 
-      For getting ball on high rocket
-      Shoulder: 
-      Elbow: 
-      Wrist: 
-
       For getting hatch panel on low rocket & Receiving Hatch Panels
       Shoulder: 423
       Elbow: 289
@@ -141,11 +136,6 @@ void Robot::RunRobot()
       Shoulder: 359
       Elbow: 333
       Wrist: 433
-
-      For getting hatch panel on high rocket
-      Shoulder: 
-      Elbow: 
-      Wrist: 
 
       For getting balls stuck out of robot frame
       Shoulder: 445
@@ -160,43 +150,44 @@ void Robot::RunRobot()
 
 
     //Toggle between allowed manual and disabled manual (fully automatic)
-    if (Xbox.RightStickButton && !isRightStickDown)
+    if (ArmController.RightStickButton && !isRightStickDown)
     { 
       manualToggle = !manualToggle;
     }
-    isRightStickDown = Xbox.RightStickButton;
+    isRightStickDown = ArmController.RightStickButton;
 
-    if(Xbox2.BButton && !isTriggerPressed)
+    if(DriveController.AButton && !isTriggerPressed)
     {
       CurrentElbowPosition = Manipulator.getRawUnits(Elbow_Axis);
       CurrentWristPosition = Manipulator.getRawUnits(Wrist_Axis);
       CurrentShoulderPosition = Manipulator.getRawUnits(Shoulder_Axis);
     }
     //Hard-coded positions
-    else if (Xbox.YButton)
+    else if (ArmController.YButton)
     {
-        //Go to ball medium position on ship
-        inPosition = Manipulator.moveToRawCounts(323, 307, 444);
+      //Go to ball medium position on ship
+      inPosition = Manipulator.moveToRawCounts(323, 307, 444);
     }
-    else if (Xbox.BButton)
+    else if (ArmController.BButton)
     {
       //Go to disc medium position on ship
       inPosition = Manipulator.moveToRawCounts(359, 333, 433);
     } 
-    else if (Xbox.AButton)
+    else if (ArmController.AButton)
     {
       inPosition = Manipulator.moveToRawCounts(423,280,333);
     } 
-    else if (Xbox.XButton)
+    else if (ArmController.XButton)
     {
       //Go to ball low position on ship
       inPosition = Manipulator.moveToRawCounts(443, 356, 368);
     }
-    else if (Xbox.LeftBumper)
+    else if (ArmController.LeftBumper)
     {
       //Grab ball from robot frame
       inPosition = Manipulator.moveToRawCounts(445,296,438);
     }
+
     //Manual Code/Default Position
     else
     {
@@ -213,16 +204,16 @@ void Robot::RunRobot()
         inPosition = Manipulator.manipSetToHome();
       }
     }
-    isTriggerPressed = Xbox2.BButton;
+    isTriggerPressed = DriveController.AButton;
 
     //Move Claw
-    if(Xbox.RightTrigger > JOYSTICK_DEADBAND)
+    if(ArmController.RightTrigger > JOYSTICK_DEADBAND)
     {
       Manipulator.ResetPosition();
     }
-    else if(Xbox.LeftTrigger > JOYSTICK_DEADBAND)
+    else if(ArmController.LeftTrigger > JOYSTICK_DEADBAND)
     {
-      Manipulator.MoveManipulatorSpeed(-Xbox.LeftTrigger);
+      Manipulator.MoveManipulatorSpeed(-ArmController.LeftTrigger);
     }
     else
     {
@@ -230,9 +221,9 @@ void Robot::RunRobot()
     }
     
     //Driving Code
-    double XInput = -Xbox2.LeftX;
-    double YInput = Xbox2.LeftY;
-    double ZInput = -Xbox2.RightX * 0.8;
+    double XInput = -DriveController.LeftX;
+    double YInput = DriveController.LeftY;
+    double ZInput = -DriveController.RightX * 0.8;
 
     //Deadbands
     if(fabs(XInput) < JOYSTICK_DEADBAND)
@@ -251,33 +242,33 @@ void Robot::RunRobot()
     }
 
     //Drive Modes
-    if(Xbox2.YButton)
+    if(DriveController.RightBumper)
     {
       XInput = 0;
       ZInput *= .8;
     }
-    else if(Xbox2.RightStickButton)
+    else if(DriveController.RightStickButton)
     {
       XInput *= .5;
       YInput *= .5;
       ZInput *= .5;
     } 
-    else if(Xbox2.LeftStickButton) //Field Oriented Control (Normally Disabled)
+    else if(DriveController.LeftStickButton) //Field Oriented Control (Normally Disabled)
     {
       Blitz::Models::MecanumInput FieldInput = FieldControl.FieldControl(XInput, YInput, Navx.GetYaw());
       XInput = FieldInput.XValue;
       YInput = FieldInput.YValue;
     }
-    else if(Xbox2.LeftBumper) //Left Strafe
+    else if(DriveController.LeftBumper) //Left Strafe
     {
       XInput = STRAFE_SPEED;
     }
-    else if(Xbox2.RightBumper) //Right Strafe
+    else if(DriveController.RightBumper) //Right Strafe
     {
        XInput = -STRAFE_SPEED;
     }
 
-    climber.SetBackSolenoid(Xbox2.YButton);
+    climber.SetBackSolenoid(DriveController.RightBumper);
 
     
   
@@ -286,19 +277,13 @@ void Robot::RunRobot()
     MecanumInput.YValue = (YInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
     MecanumInput.ZValue = (ZInput * Blitz::DriveReference::MAX_SPEED_METERS_PER_SECOND);
 
-    //Runs BallTracking
-    if(Xbox2.AButton)
-    {
-      AutoManager.DriveToBall(&MecanumInput);
-    }
-    
     //Receive raw input from potentiometers
     rawShoulder = Manipulator.getRawUnits(Shoulder_Axis);
     rawElbow = Manipulator.getRawUnits(Elbow_Axis);
     rawWrist = Manipulator.getRawUnits(Wrist_Axis);
 
     //Overrides drive and arm control to automatically back away from where the hatch panel was placed
-    if(Xbox2.BButton)
+    if(DriveController.AButton)
     {
       inPosition = unStickManipulator(CurrentShoulderPosition, CurrentElbowPosition, CurrentWristPosition);
     }
@@ -308,15 +293,12 @@ void Robot::RunRobot()
     //Record remaining information to SmartDashboard
     frc::SmartDashboard::PutNumber("Elbow Start Position", CurrentElbowPosition);
     frc::SmartDashboard::PutNumber("Shoulder Pot Raw Current", rawShoulder);
-    frc::SmartDashboard::PutNumber("Shoulder Pot Degrees", Manipulator.getDegrees(Shoulder_Axis, homeEncoderValueShoulder));
     frc::SmartDashboard::PutNumber("Elbow Pot Raw Current", rawElbow);
-    frc::SmartDashboard::PutNumber("Elbow Pot Degrees", Manipulator.getDegrees(Elbow_Axis, homeEncoderValueElbow));
     frc::SmartDashboard::PutNumber("Wrist Pot Raw Current", rawWrist);
-    frc::SmartDashboard::PutNumber("Wrist Pot Degrees", Manipulator.getDegrees(Wrist_Axis, homeEncoderValueWrist));
     frc::SmartDashboard::PutNumber("Shoulder's Axis", axisShoulder);
     frc::SmartDashboard::PutNumber("Elbow's Axis", axisElbow);
     frc::SmartDashboard::PutNumber("Wrist's Axis", axisWrist);
-    frc::SmartDashboard::PutBoolean("IsHorizontal", Xbox.AButton);
+    frc::SmartDashboard::PutBoolean("IsHorizontal", ArmController.AButton);
     frc::SmartDashboard::PutBoolean("In Position", inPosition);
     
     frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
@@ -357,11 +339,11 @@ void Robot::Test()
 
     int MotorNum = frc::SmartDashboard::GetNumber("MotorNum", 1);
 
-    MecanumDrive.UsePID = !Xbox.LeftBumper;
+    MecanumDrive.UsePID = !ArmController.LeftBumper;
 
-    Xbox.update();
+    ArmController.update();
 
-    MecanumInput.YValue = Xbox.LeftY;
+    MecanumInput.YValue = ArmController.LeftY;
 
     MecanumDrive.TuneF(1, FGain);
     MecanumDrive.TuneP(1, PGain);
