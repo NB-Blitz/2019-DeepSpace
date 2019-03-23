@@ -31,17 +31,11 @@ namespace Blitz
             Manipulator();
 
             void manipSet(double speed, int axisID, double rawHome); //PercentageOutput (No PID)
-            void manipSetToDegrees(double degrees, int axisID, double rawHome);
+            
             bool manipSetToHome();
             double getRawUnits(int axisID);
-            double getDegrees(int axisID, double rawHome); //0 is Main, 1 is Secondary...
-            double getAngleForCoordinates(double x, double y, int axisID); //used by next method
             bool moveToRawCounts(double rawShoulder, double rawElbow, double rawWrist);
-            void moveToAngles(double shoulderAngle, double elbowAngle, double wristAngle, double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist);
-            void moveToCoordinates(double x, double y, double rawHomeShoulder, double rawHomeElbow); //In inches
-            bool isPossible(double x, double y);
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
-            double optimizeAutomaticMovement(double desiredShoulder, double desiredElbow, int axisID);
             double getSpeed(double minSpeed, double maxSpeed, double currentPosition, double desiredPosition, bool isReversed);
             bool ResetPosition();
             void MoveManipulatorSpeed(double speed);
