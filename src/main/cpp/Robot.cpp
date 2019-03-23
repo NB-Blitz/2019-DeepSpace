@@ -209,11 +209,11 @@ void Robot::RunRobot()
     //Move Claw
     if(ArmController.RightTrigger > JOYSTICK_DEADBAND)
     {
-      Manipulator.ResetPosition();
+      Manipulator.MoveManipulatorSpeed(1);
     }
     else if(ArmController.LeftTrigger > JOYSTICK_DEADBAND)
     {
-      Manipulator.MoveManipulatorSpeed(-ArmController.LeftTrigger);
+      Manipulator.MoveManipulatorSpeed(-1);
     }
     else
     {
@@ -300,6 +300,7 @@ void Robot::RunRobot()
     frc::SmartDashboard::PutNumber("Wrist's Axis", axisWrist);
     frc::SmartDashboard::PutBoolean("IsHorizontal", ArmController.AButton);
     frc::SmartDashboard::PutBoolean("In Position", inPosition);
+    frc::SmartDashboard::PutBoolean("Manual Mode", manualToggle);
     
     frc::SmartDashboard::PutNumber("FrontLeftJoyStick", MecanumDrive.GetMotorOutput(1));
     frc::SmartDashboard::PutNumber("BackLeftJoyStick", MecanumDrive.GetMotorOutput(2));

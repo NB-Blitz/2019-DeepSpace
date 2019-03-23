@@ -39,7 +39,6 @@ namespace Blitz
             double getSpeed(double minSpeed, double maxSpeed, double currentPosition, double desiredPosition, bool isReversed);
             bool ResetPosition();
             void MoveManipulatorSpeed(double speed);
-            void MoveManipulatorPosition(double diameter);
             void InitializeArm();
 
             double currentPosition = 0;
@@ -88,16 +87,23 @@ namespace Blitz
             const double LARGE_GEAR_TEETH = 57;
             const double PULSES_PER_ROTATION = 180;
 
+            const double MAX_CURRENT = 7;
+
             const double PULSES_PER_ANGLE_SMALL_GEAR = ((PULSES_PER_ROTATION/LARGE_GEAR_TEETH) * SMALL_GEAR_TEETH)/360;
 
             int direction = 1;
 
-            frc::DigitalInput LimitSwitch;
+            int stallDirection = 0;
+
+            frc::DigitalInput LimitSwitchClose;
+            frc::DigitalInput LimitSwitchOpen;
             frc::Counter PositionCounter;
             
             TalonSRX ClawTalon;
             TalonSRX Shoulder_Motor; 
             TalonSRX Elbow_Motor;
             TalonSRX Wrist_Motor;
+
+            PowerDistributionPanel PDP;
     };
 }

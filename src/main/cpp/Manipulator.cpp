@@ -2,10 +2,12 @@
 #include "math.h"
 
 Blitz::Manipulator::Manipulator() :
+    PDP(0),
     Shoulder_Motor(4),
     Elbow_Motor(5),    
     Wrist_Motor(6),
-    LimitSwitch(0),
+    LimitSwitchClose(0),
+    LimitSwitchOpen(1),
     ClawTalon(7),
     PositionCounter(1)
 {
@@ -390,7 +392,7 @@ double Blitz::Manipulator::getSpeed(double minSpeed, double maxSpeed, double cur
 
 bool Blitz::Manipulator::ResetPosition()
 {
-    if(LimitSwitch.Get())
+    if(LimitSwitchClose.Get())
     {
         ClawTalon.Set(ControlMode::PercentOutput, .7);
     }
@@ -400,64 +402,58 @@ bool Blitz::Manipulator::ResetPosition()
         PositionCounter.Reset();
         currentPosition = 0;
     }
-    return LimitSwitch.Get();
+    return LimitSwitchClose.Get();
 }
 
 void Blitz::Manipulator::MoveManipulatorSpeed(double speed)
 {
-    ClawTalon.Set(ControlMode::PercentOutput, speed);
-
-    if(speed < 0)
+    if(speed < -.1)
     {
-        currentPosition += PositionCounter.Get() * direction;
-        PositionCounter.Reset();
+        if(LimitSwitchOpen.Get() && stallDirection != -1)
+        {
+            // if(PDP.GetCurrent(14) <= MAX_CURRENT)
+            // {
+                ClawTalon.Set(ControlMode::PercentOutput, -.7);
+            //     stallDirection = 0;
+            // }
+            // else
+            // {
+            //     stallDirection = direction;
+            // }
+        }
+        else 
+        {
+            ClawTalon.Set(ControlMode::PercentOutput, 0);
+        }
 
         direction = -1;
     }
-    else if(speed > .05)
-    {
-        currentPosition += PositionCounter.Get() * direction;
-        PositionCounter.Reset();
-
-        direction = 1;
+    else if(speed > .1)
+    {        
+        if(LimitSwitchClose.Get() && stallDirection != 1)
+        {
+            // if(PDP.GetCurrent(14) <= MAX_CURRENT)
+            // {
+                ClawTalon.Set(ControlMode::PercentOutput, .7);
+                stallDirection = 0;
+            // }
+            // else
+            // {
+            //     stallDirection = direction;
+            // }
+            
+        }
+        else 
+        {
+            ClawTalon.Set(ControlMode::PercentOutput, 0);
+        }
     }
-}
-
-void Blitz::Manipulator::MoveManipulatorPosition(double diameter)
-{
-    //diameter = 19.575 - diameter;
-
-
-    double angle = ((asin((((diameter/2) - 5.375)/4.25))*(180/3.1459))-90);
-
-    
-    cout << angle << endl;
-
-    int counts = angle * PULSES_PER_ANGLE_SMALL_GEAR;
-
-    //int counts = 30;
-
-    currentPosition += PositionCounter.Get() * direction;
-    PositionCounter.Reset();
-
-    direction = -1;
-
-    if(currentPosition > counts)
-    {
-        ClawTalon.Set(ControlMode::PercentOutput, -.5);
-        direction = -1;
-    }
-    else if(currentPosition < counts)
-    {
-        ClawTalon.Set(ControlMode::PercentOutput, .5);
-        direction = 1;
-    }
-    else 
+    else
     {
         ClawTalon.Set(ControlMode::PercentOutput, 0);
     }
-    
 }
+
 void Blitz::Manipulator::InitializeArm()
 {
     Shoulder_Motor.ConfigOpenloopRamp(1);
