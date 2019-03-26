@@ -405,6 +405,11 @@ bool Blitz::Manipulator::ResetPosition()
     return LimitSwitchClose.Get();
 }
 
+void Blitz::Manipulator::MoveManipulatorSpeedNoLimit(double speed)
+{
+    ClawTalon.Set(ControlMode::PercentOutput, speed);
+}
+
 void Blitz::Manipulator::MoveManipulatorSpeed(double speed)
 {
     if(speed < -.1)

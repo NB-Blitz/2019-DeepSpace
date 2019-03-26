@@ -38,6 +38,7 @@ namespace Blitz
             void moveToXDegreesBelowParallel(double rawHomeShoulder, double rawHomeElbow, double rawHomeWrist, double x);
             double getSpeed(double minSpeed, double maxSpeed, double currentPosition, double desiredPosition, bool isReversed);
             bool ResetPosition();
+            void MoveManipulatorSpeedNoLimit(double speed);
             void MoveManipulatorSpeed(double speed);
             void InitializeArm();
 

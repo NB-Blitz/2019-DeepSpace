@@ -215,6 +215,10 @@ void Robot::RunRobot()
     {
       Manipulator.MoveManipulatorSpeed(-1);
     }
+    else if(ArmController.LeftStickButton)
+    {
+      Manipulator.MoveManipulatorSpeedNoLimit(1);
+    }
     else
     {
       Manipulator.MoveManipulatorSpeed(0);
